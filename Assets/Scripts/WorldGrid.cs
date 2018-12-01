@@ -9,6 +9,8 @@ public class WorldGrid : MonoBehaviour {
 
     public int width;
     public int height;
+    public float scale = 1f;
+    private Vector3 zero; // origin of the grid, i.e. real-world coordinates of the center of the leftest-bottomest cell
 
     public static float roadFactor = 3f;
 
@@ -60,10 +62,12 @@ public class WorldGrid : MonoBehaviour {
 
     public Cell[,] cells;
 
-    private void Start() {
+    private void Awake() {
         if (instance != null) Debug.LogError("Multiples instances of Grid");
         instance = this;
         cells = new Cell[height, width];
+        zero = transform.position - scale/2 * new Vector3(width + 1, 0, height + 1);
+        Debug.Log("Center of (0,0) cell: " + zero.ToString());
     }
 
     private void Update() {
@@ -119,5 +123,31 @@ public class WorldGrid : MonoBehaviour {
 
     public List<Vector2Int> Smooth(List<Vector2Int> path) {
         return path;
+    }
+
+    public Vector2Int GridPos(Vector3 pos) {
+        Vector3 delta = pos - (zero - new Vector3(0.5f, 0f, 0.5f)); // offset to the bottom-left of the (0,0) cell
+        Vector2Int res = new Vector2Int((int)delta.x, (int)delta.z);
+        Debug.Log("Real " + pos.ToString() + " grid " + res.ToString());
+        return res;
+    }
+
+    public Vector3 RealPos(Vector2Int pos, float height = 0f) {
+        Vector3 res = zero + new Vector3(pos.x, height, pos.y);
+        Debug.Log("Grid " + pos.ToString() + " real " + res.ToString());
+        return res;
+    }
+
+    public void AddBuilding(Building b) {
+        Debug.Log("Adding building " + b + " at " + b.pos.ToString() + " size " + b.size.ToString());
+        for (int y = b.pos.y; y < b.pos.y + b.size.y; y++) {
+            for (int x = b.pos.x; x < b.pos.x + b.size.x; x++) {
+                if (b is Road) {
+                    cells[y, x].isRoad = true;
+                } else {
+                    cells[y, x].isObstacle = true;
+                }
+            }
+        }
     }
 }

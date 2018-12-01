@@ -8,6 +8,7 @@ public class Worker : MonoBehaviour {
     public enum Job { Farmer, Builder, Breeder, Priest };
     public Job job = Job.Farmer;
     public float velocity = 3f;
+    public float height = 1f;
 
     List<Vector2Int> currentPath;
     int currentPathPos;
@@ -17,17 +18,17 @@ public class Worker : MonoBehaviour {
     // Start is called before the first frame update
     void Start() {
         currentPath = new List<Vector2Int>();
+        target = WorldGrid.instance.GridPos(transform.position);
+        //Debug.Log("Starting on " + target.ToString());
     }
 
     // Update is called once per frame
     void Update() {
-        // Update target if need be
-
         // Detect if we achieved our goal
         if (currentPathPos < currentPath.Count) {
-            Vector2Int target = currentPath[currentPathPos];
-            Vector2Int curPos = GridPos(transform.position);
-            if (curPos == target) {
+            Vector3 target = WorldGrid.instance.RealPos(currentPath[currentPathPos], height);
+            Vector3 curPos = transform.position;
+            if ((target - curPos).sqrMagnitude < 1e-12) {
                 currentPathPos++;
             }
         }
@@ -35,26 +36,18 @@ public class Worker : MonoBehaviour {
         // Move to target
         if (currentPathPos < currentPath.Count) {
             Vector2Int target = currentPath[currentPathPos];
-            Debug.Log("Moving to " + RealPos(target).ToString() + " from " + transform.position.ToString());
-            Vector3 delta = RealPos(target) - transform.position;
+            //Debug.Log("Moving to " + WorldGrid.instance.RealPos(target, height).ToString() + " from " + transform.position.ToString());
+            Vector3 delta = WorldGrid.instance.RealPos(target, height) - transform.position;
             delta = delta * Mathf.Min(1, velocity * Time.deltaTime / delta.magnitude);
             transform.position += delta;
         }
     }
 
-    Vector2Int GridPos(Vector3 pos) {
-        return new Vector2Int((int)pos.x, (int)pos.z);
-    }
-
-    Vector3 RealPos(Vector2Int pos) {
-        return new Vector3(pos.x + 0.5f, 0f, pos.y + 0.5f);
-    }
-
     void moveTo(Vector2Int target) {
-        Vector2Int origin = GridPos(transform.position);
-        Debug.Log("origin: " + origin.ToString() + " target: " + target.ToString());
+        Vector2Int origin = WorldGrid.instance.GridPos(transform.position);
+        //Debug.Log("origin: " + origin.ToString() + " target: " + target.ToString());
         currentPath = WorldGrid.instance.Smooth(WorldGrid.instance.Path(origin, target));
-        Debug.Log("New path: " + String.Join(";", currentPath.ConvertAll(v => v.ToString()).ToArray()));
+        //Debug.Log("New path: " + String.Join(";", currentPath.ConvertAll(v => v.ToString()).ToArray()));
         currentPathPos = 0;
     }
 
