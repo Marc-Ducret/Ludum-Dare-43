@@ -6,6 +6,7 @@
 Assets/AssetStoreTools*
 
 .idea/
+Assets/_TerrainAutoUpgrade*
 Assets/_TerrainAutoUpgrade
 
 # Visual Studio cache directory
