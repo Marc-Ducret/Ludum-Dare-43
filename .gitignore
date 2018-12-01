@@ -5,6 +5,9 @@
 [Bb]uilds/
 Assets/AssetStoreTools*
 
+.idea/
+Assets/_TerrainAutoUpgrade
+
 # Visual Studio cache directory
 .vs/
 
