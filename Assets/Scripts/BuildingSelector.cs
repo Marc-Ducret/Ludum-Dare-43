@@ -4,39 +4,48 @@ using UnityEngine;
 using System;
 
 public class BuildingSelector : MonoBehaviour {
-    public bool selected;
-    public string selector;
+    private BuildingIcon selected;
     public Camera camera;
     public LayerMask mask;
-    public Transform cube;
-    private Transform c;
+    public Material ghostMaterial;
 
-    // Start is called before the first frame update
-    void Start() {
-        selected = false;
-        selector = null;
-        c = Instantiate(cube);
+    private Building ghost;
+
+    private void Start() {
+        selected = null;
     }
 
-    // Update is called once per frame
-    void Update() {
-        if (selected) {
+    private void Update() {
+        if (selected != null) {
+            if (Input.GetMouseButtonDown(1)) UpdateSelection(null);
             var ray = camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             Physics.Raycast(ray, out hit, 100, mask);
-            c.position = hit.point; 
+            var grid = WorldGrid.instance;
+            var gridPos = grid.GridPos(hit.point - grid.RealVec(selected.buildingPrefab.size) / 2);
+            var snapPosition = grid.RealPos(gridPos);
+            ghost.transform.position = snapPosition;
+            var canPlace = grid.CanPlaceAt(gridPos, selected.buildingPrefab.size);
+            ghostMaterial.color = canPlace ? Color.green : Color.red;
             
-            if (Input.GetMouseButtonDown(0)) {
-                c.position = hit.point;
-                c = Instantiate(cube);
-                UpdateSelection(null, false);
-                
+            if (Input.GetMouseButtonDown(0) && canPlace) {
+                var building = Instantiate(selected.buildingPrefab);
+                building.transform.position = snapPosition;
+                UpdateSelection(null);
             }
         }
     }
 
-    public void UpdateSelection(string nameSelector, bool select) {
+    public void UpdateSelection(BuildingIcon select) {
         selected = select;
-        selector = nameSelector;
+        if (ghost != null) {
+            Destroy(ghost.gameObject);
+            ghost = null;
+        }
+        if (selected != null) {
+            ghost = Instantiate(selected.buildingPrefab);
+            ghost.enabled = false;
+            ghost.GetComponent<MeshRenderer>().material = ghostMaterial;
+        }
     }
 }

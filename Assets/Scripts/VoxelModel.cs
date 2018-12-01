@@ -43,8 +43,11 @@ public class VoxelModel : MonoBehaviour {
     private Mesh mesh;
     public TextAsset model;
     public bool horizontalCenter;
+    public bool noDownFaces;
     private Voxel[,,] voxels;
     private List<Voxel> voxelsList;
+
+    public Rigidbody particlePrefab;
 
     private Vector3Int size;
 
@@ -100,19 +103,25 @@ public class VoxelModel : MonoBehaviour {
         foreach (var v in voxelsList) {
             for (var sign = +1; sign >= -1; sign -= 2) {
                 for (var shift = 0; shift < 3; shift++) {
+                    if (shift == 1 && sign == 1 && noDownFaces) continue;
                     var dir = Voxel.Axis[shift] * -sign;
                     if (GetVoxel(v.pos + dir).color != new Color()) continue;
-                    for (var i = 0; i < 6; i++) {
+                    for (var i = 0; i < 4; i++) {
                         normals.Add(dir);
                         colors.Add(v.color);
                     }
-                    triangles.Add(idx(v.TriangleVertex(shift, 0x00, sign < 0)));
-                    triangles.Add(idx(v.TriangleVertex(shift, 0x11, sign < 0)));
-                    triangles.Add(idx(v.TriangleVertex(shift, 0x01, sign < 0)));
 
-                    triangles.Add(idx(v.TriangleVertex(shift, 0x00, sign < 0)));
-                    triangles.Add(idx(v.TriangleVertex(shift, 0x10, sign < 0)));
-                    triangles.Add(idx(v.TriangleVertex(shift, 0x11, sign < 0)));
+                    var v00 = idx(v.TriangleVertex(shift, 0x00, sign < 0));
+                    var v01 = idx(v.TriangleVertex(shift, 0x01, sign < 0));
+                    var v11 = idx(v.TriangleVertex(shift, 0x11, sign < 0));
+                    var v10 = idx(v.TriangleVertex(shift, 0x10, sign < 0));
+                    triangles.Add(v00);
+                    triangles.Add(v11);
+                    triangles.Add(v01);
+                    
+                    triangles.Add(v00);
+                    triangles.Add(v10);
+                    triangles.Add(v11);
                 }
             }
         }
@@ -131,5 +140,32 @@ public class VoxelModel : MonoBehaviour {
         ParseModel();
         GenerateMesh();
         GetComponent<MeshFilter>().mesh = mesh;
+    }
+
+    private static void SetMeshColor(Mesh mesh, Color color) {
+        var colors = new Color[mesh.vertices.Length];
+        for (var i = 0; i < colors.Length; i++) colors[i] = color;
+        mesh.colors = colors;
+    }
+
+    [ContextMenu("Explode")]
+    public void Explode() {
+        const float force = 200f;
+        var groundCenter = transform.position;
+        var origin = transform.position;
+        if (horizontalCenter) origin -= Vector3.ProjectOnPlane(size, Vector3.up) / 2;
+        else groundCenter += Vector3.ProjectOnPlane(size, Vector3.up) / 2;
+        foreach(var voxel in voxelsList) {
+            var particle = Instantiate(
+                particlePrefab,
+                origin + transform.TransformVector(voxel.pos) + Vector3.one * .5F,
+                transform.rotation
+            );
+            particle.AddExplosionForce(force, groundCenter, size.magnitude);
+            SetMeshColor(particle.GetComponent<MeshFilter>().mesh, voxel.color);
+            
+            Destroy(particle.gameObject, 500);
+        }
+        Destroy(gameObject);
     }
 }
