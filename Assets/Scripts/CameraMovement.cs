@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraMovement : MonoBehaviour
 {
-    private float speed = 10.0f;
+    private float speed = 1.0f;
     
     void Start()
     {
@@ -13,15 +13,25 @@ public class CameraMovement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetAxis("Mouse X") > 0)
+        /*if (Input.GetAxis("Mouse X") > 0)
         {
-            transform.position += new Vector3(Input.GetAxisRaw(("Mouse X") + Time.deltaTime * speed,
-                0.0f, Input.GetAxisRaw("Mouse Y") + Time.deltaTime * speed));
+            transform.position += new Vector3(Input.GetAxisRaw("Mouse X") + Time.deltaTime * speed,
+                0.0f, Input.GetAxisRaw("Mouse Y") * Time.deltaTime * speed);
         }
         else if (Input.GetAxis("Mouse X") < 0)
         {
             transform.position += new Vector3(Input.GetAxisRaw("Mouse X") + Time.deltaTime * speed, 
-                0.0f, Input.GetAxisRaw("Mouse Y") + Time.deltaTime * speed);
+                0.0f, Input.GetAxisRaw("Mouse Y") * Time.deltaTime * speed);
+        }*/
+        if (Input.mousePosition.z == 0)
+        {
+            transform.position += new Vector3(Input.GetAxisRaw("Mouse X") + Time.deltaTime * speed,
+                0.0f, Input.GetAxisRaw("Mouse Y") * Time.deltaTime * speed);
+        }
+        else if (Input.mousePosition.z == Screen.width)
+        {
+            transform.position += new Vector3(Input.GetAxisRaw("Mouse X") + Time.deltaTime * speed, 
+                0.0f, Input.GetAxisRaw("Mouse Y") * Time.deltaTime * speed);
         }
     }
 }
