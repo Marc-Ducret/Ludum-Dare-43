@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class mana : MonoBehaviour {
+public class ValueIndication : MonoBehaviour {
     public Text txt;
     public int maxValue;
     private string buttonName; 

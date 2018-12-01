@@ -2,25 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class buildingSelector : MonoBehaviour {
-    
+public class BuildingSelector : MonoBehaviour {
     public bool selected;
-    public string selector; 
-    
+    public string selector;
+
     // Start is called before the first frame update
     void Start() {
         selected = false;
-        selector = null; 
+        selector = null;
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    void Update() {
         Debug.Log(selected);
     }
 
     public void UpdateSelection(string nameselector, bool select) {
         selected = select;
-        selector = nameselector; 
+        selector = nameselector;
     }
 }

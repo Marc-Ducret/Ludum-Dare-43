@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class imageTraitement : MonoBehaviour {
+public class ImageTraitement : MonoBehaviour {
     public Button but;
     public string batName;
-    public buildingSelector bs; 
+    public BuildingSelector bs; 
 
     // Start is called before the first frame update
     void Start() {

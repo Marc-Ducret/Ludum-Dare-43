@@ -4,9 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class buttonAction : MonoBehaviour
+public class ButtonAction : MonoBehaviour
 {
-    public buildingSelector bs; 
+    public BuildingSelector bs; 
     public Button but;
 
     // Start is called before the first frame update
