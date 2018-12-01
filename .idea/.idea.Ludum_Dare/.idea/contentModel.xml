@@ -7,12 +7,14 @@
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="Models" t="Include">
+          <e p="character.txt" t="Include" />
           <e p="warehouse.txt" t="Include" />
         </e>
         <e p="Scripts" t="Include">
           <e p="Building.cs" t="Include" />
           <e p="buildingSelector.cs" t="Include" />
           <e p="buttonAction.cs" t="Include" />
+          <e p="CameraMovement.cs" t="Include" />
           <e p="imageTraitement.cs" t="Include" />
           <e p="PriorityQueue.cs" t="Include" />
           <e p="Road.cs" t="Include" />
