@@ -20,13 +20,13 @@ public class Worker : MonoBehaviour {
 
     public Vector2Int target;
 
-    IEnumerable<int> actions;
+    IEnumerator<int> actions;
 
     // Start is called before the first frame update
     void Start() {
         currentPath = new List<Vector2Int>();
         target = WorldGrid.instance.GridPos(transform.position);
-        actions = Actions();
+        actions = Actions().GetEnumerator();
         currentVelocity = baseVelocity;
         //Debug.Log("Starting on " + target.ToString());
     }
@@ -123,6 +123,6 @@ public class Worker : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-
+        actions.MoveNext();
     }
 }
