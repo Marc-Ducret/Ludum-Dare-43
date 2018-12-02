@@ -210,7 +210,6 @@ public class WorldGrid : MonoBehaviour {
     }
 
     public void AddBuilding(Building b) {
-        Debug.Log("Adding building " + b.ToString() + " walkable " + b.Walkable().ToString());
         for (int y = b.pos.y; y < b.pos.y + b.size.y; y++) {
             for (int x = b.pos.x; x < b.pos.x + b.size.x; x++) {
                 if (b is Road) {
@@ -223,6 +222,18 @@ public class WorldGrid : MonoBehaviour {
         }
 
         buildings.Add(b);
+    }
+
+    public void RemoveBuilding(Building b) {
+        for (int y = b.pos.y; y < b.pos.y + b.size.y; y++) {
+            for (int x = b.pos.x; x < b.pos.x + b.size.x; x++) {
+                cells[y, x].isRoad = false;
+                cells[y, x].isBuildable = true;
+                cells[y, x].isWalkable = true;
+            }
+        }
+
+        buildings.Remove(b);
     }
 
     // Returns all buildings of type B

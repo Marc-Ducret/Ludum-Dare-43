@@ -48,4 +48,8 @@ public class Building : MonoBehaviour {
         }
         return l.FindAll(p => WorldGrid.instance.IsValid(p) && WorldGrid.instance.IsWalkable(p));
     }
+
+    private void OnDestroy() {
+        WorldGrid.instance.RemoveBuilding(this);
+    }
 }

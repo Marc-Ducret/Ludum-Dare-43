@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   job: 2
-  baseVelocity: 3
+  baseVelocity: 10
   currentVelocity: 0
   height: 0
   target: {x: 0, y: 0}

@@ -53,7 +53,6 @@ public class Worker : MonoBehaviour {
                     animation.acting = 1;
                     while (animation.acting > 0) yield return 0;
                     animation.Hold(Resource.Food);
-                    // TODO: change model to farmer holding corn
 
                     // Find a suitable warehouse
                     Warehouse warehouse = null;
@@ -69,8 +68,39 @@ public class Worker : MonoBehaviour {
                     Debug.Assert(warehouse.AddElement(Resource.Food), "Storing failed");
                     animation.Drop();
                     yield return 0;
- 
-                    // TODO: change model to farmer without corn
+                }
+
+            case Job.Logger:
+                while (true) {
+                    // Find a suitable field
+                    Tree tree = null;
+                    foreach (Tree t in FindBuilding<Tree>(t => true)) {
+                        if (t == null) {
+                            yield return 0;
+                        } else {
+                            tree = t;
+                        }
+                    }
+
+                    tree.GetComponent<VoxelModel>().Explode();
+                    animation.acting = 1;
+                    while (animation.acting > 0) yield return 0;
+                    animation.Hold(Resource.Wood);
+
+                    // Find a suitable warehouse
+                    Warehouse warehouse = null;
+                    foreach (Warehouse w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Wood))) {
+                        if (w == null) {
+                            yield return 0;
+                        }
+                        else {
+                            warehouse = w;
+                        }
+                    }
+
+                    Debug.Assert(warehouse.AddElement(Resource.Wood), "Storing failed");
+                    animation.Drop();
+                    yield return 0;
                 }
         }
     }
