@@ -41,7 +41,7 @@ public class Worker : MonoBehaviour {
                 while (true) {
                     // Find a suitable field
                     Field field = null;
-                    foreach (Field f in FindBuilding<Field>(f => f.hasCorn())) {
+                    foreach (Field f in FindBuilding<Field>(f => f.HasCorn())) {
                         if (f == null) {
                             yield return 0;
                         } else {
@@ -49,7 +49,7 @@ public class Worker : MonoBehaviour {
                         }
                     }
 
-                    Debug.Assert(field.harvest(), "Harvest failed");
+                    Debug.Assert(field.Harvest(), "Harvest failed");
                     animation.acting = 1;
                     while (animation.acting > 0) yield return 0;
                     animation.holding = true;

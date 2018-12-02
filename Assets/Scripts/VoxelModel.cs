@@ -7,19 +7,20 @@ using Random = UnityEngine.Random;
 public struct Voxel {
     public Vector3Int pos;
     public readonly Color color;
+    public int depth;
     
     public Voxel(Vector3Int pos, Color color) {
         this.pos = pos;
         this.color = color;
+        this.depth = -1;
     }
 
-    public Voxel(Vector3Int pos, int color) {
-        this.pos = pos;
-        this.color = new Color(
-            ((color >> 16) & 0xFF) / (float) 0xFF,
-            ((color >>  8) & 0xFF) / (float) 0xFF,
-            ((color >>  0) & 0xFF) / (float) 0xFF
-        );
+    public Voxel(Vector3Int pos, int color) : this(pos, new Color(
+            ((color >> 16) & 0xFF) / (float)0xFF,
+            ((color >> 8) & 0xFF) / (float)0xFF,
+            ((color >> 0) & 0xFF) / (float)0xFF
+        )) {
+
     }
 
     public static readonly Vector3Int[] Axis = {Vector3Int.right, Vector3Int.up, new Vector3Int(0, 0, 1)};
@@ -89,9 +90,11 @@ public class VoxelModel : MonoBehaviour {
         foreach (var v in VoxelsList) {
             Voxels[v.pos.x, v.pos.y, v.pos.z] = v;
         }
+
+        ComputeDepth();
     }
 
-    private void GenerateMesh() {
+    public void GenerateMesh(int maxDepth = -1) {
         var vertices = new List<Vector3>();
         var normals = new List<Vector3>();
         var colors = new List<Color>();
@@ -104,6 +107,8 @@ public class VoxelModel : MonoBehaviour {
         var triangles = new List<int>();
 
         foreach (var voxel in VoxelsList) {
+            if (maxDepth >= 0 && voxel.depth > maxDepth) break;
+
             for (var sign = +1; sign >= -1; sign -= 2) {
                 for (var shift = 0; shift < 3; shift++) {
                     if (shift == 1 && sign == 1 && noDownFaces) continue;
@@ -175,5 +180,38 @@ public class VoxelModel : MonoBehaviour {
             Destroy(particle.gameObject, 500);
         }
         Destroy(gameObject);
+    }
+
+    public void ComputeDepth() {
+        Queue<Voxel> toVisit = new Queue<Voxel>();
+        List<Voxel> visited = new List<Voxel>();
+        for (int i = 0; i < VoxelsList.Count; i++) {
+            Voxel v = VoxelsList[i];
+            if (v.pos.y == 0) {
+                v.depth = 0;
+                toVisit.Enqueue(v);
+                Voxels[v.pos.x, v.pos.y, v.pos.z] = v;
+            }
+        }
+
+        while (toVisit.Count > 0) {
+            Voxel v = toVisit.Dequeue();
+            for (var sign = +1; sign >= -1; sign -= 2) {
+                for (var shift = 0; shift < 3; shift++) {
+                    var dir = Voxel.Axis[shift] * sign;
+                    var nextPos = v.pos + dir;
+                    var next = GetVoxel(nextPos);
+                    if (next.color.a == 0) continue;
+                    if (next.depth >= 0) continue;
+
+                    next.depth = v.depth + 1;
+                    toVisit.Enqueue(next);
+                    visited.Add(next);
+                    Voxels[next.pos.x, next.pos.y, next.pos.z] = v;
+                }
+            }
+        }
+
+        VoxelsList = visited;
     }
 }
