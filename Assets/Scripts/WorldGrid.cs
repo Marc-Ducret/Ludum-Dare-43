@@ -9,7 +9,7 @@ public class WorldGrid : MonoBehaviour {
 
     public int width;
     public int height;
-    public float scale = 1f;
+    public float scale;
     private Vector3 zero; // origin of the grid, i.e. real-world coordinates of the center of the leftest-bottomest cell
 
     public static float roadFactor = 3f;
@@ -126,16 +126,26 @@ public class WorldGrid : MonoBehaviour {
     }
 
     public Vector2Int GridPos(Vector3 pos) {
-        Vector3 delta = pos - (zero - new Vector3(0.5f, 0f, 0.5f)); // offset to the bottom-left of the (0,0) cell
-        Vector2Int res = new Vector2Int((int)delta.x, (int)delta.z);
-        Debug.Log("Real " + pos.ToString() + " grid " + res.ToString());
-        return res;
+        Vector3 delta = (pos - zero) / scale + new Vector3(0.5f, 0f, 0.5f); // offset to the bottom-left of the (0,0) cell
+        return new Vector2Int((int)delta.x, (int)delta.z);
     }
 
     public Vector3 RealPos(Vector2Int pos, float height = 0f) {
-        Vector3 res = zero + new Vector3(pos.x, height, pos.y);
-        Debug.Log("Grid " + pos.ToString() + " real " + res.ToString());
-        return res;
+        return zero + new Vector3(pos.x, height / scale, pos.y) * scale;
+    }
+
+    public Vector3 RealVec(Vector2Int vec) {
+        return new Vector3(vec.x, height / scale, vec.y) * scale;
+    }
+
+    public bool CanPlaceAt(Vector2Int pos, Vector2Int size) {
+        for (var y = pos.y; y < pos.y + size.y; y++) {
+            for (var x = pos.x; x < pos.x + size.x; x++) {
+                if (cells[y, x].isObstacle) return false;
+            }
+        }
+
+        return true;
     }
 
     public void AddBuilding(Building b) {

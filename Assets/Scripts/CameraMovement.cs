@@ -4,7 +4,7 @@ using UnityEngine;
  
 public class CameraMovement : MonoBehaviour
 {
-    private float speed = 3.0f;
+    public float speed = 3.0f;
     private int pixelDelta = 15;
     private int pixelLimit = 100;
     
