@@ -72,6 +72,7 @@ public class WorldGrid : MonoBehaviour {
 
     public Cell[,] cells;
 
+    [ContextMenu("Awake")]
     private void Awake() {
         if (instance != null) Debug.LogError("Multiples instances of Grid");
         instance = this;
