@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(VoxelModel))]
 public class WorldGrid : MonoBehaviour {
@@ -11,6 +12,11 @@ public class WorldGrid : MonoBehaviour {
     public int width;
     public int height;
     public float scale;
+
+    public int treeCount;
+    public Building treePrefab;
+    public float minDist;
+    
     private Vector3 zero; // origin of the grid, i.e. real-world coordinates of the leftest-bottomest cell
 
     public static float roadFactor = 3f;
@@ -69,7 +75,16 @@ public class WorldGrid : MonoBehaviour {
         instance = this;
         cells = new Cell[height, width];
         zero = Vector3.ProjectOnPlane(transform.position, Vector3.up) - scale/2 * new Vector3(width, 0, height);
-        Debug.Log("Center of (0,0) cell: " + zero.ToString());
+    }
+
+    private void PlaceTrees() {
+        for (var i = 0; i < treeCount; i++) {
+            var x = Random.Range(0, width);
+            var y = Random.Range(0, height);
+            var pos = new Vector2Int(x, y);
+            if (cells[y, x].isBuildable && Vector2.Distance(pos, new Vector2Int(width / 2, height / 2)) > minDist)
+                Instantiate(treePrefab, RealPos(pos), Quaternion.identity);
+        }
     }
 
     private void Start() {
@@ -81,6 +96,7 @@ public class WorldGrid : MonoBehaviour {
                 cells[y, x].isWalkable = clear;
             }
         }
+        PlaceTrees();
     }
 
     public List<Neighbor> Neighbors(Vector2Int pos) {
@@ -142,7 +158,7 @@ public class WorldGrid : MonoBehaviour {
 
     public Vector3 RealPos(Vector2Int pos, float height = 0f, bool center = true) {
         return zero + new Vector3(pos.x, height / scale, pos.y) * scale +
-               (center ? Vector3.one * scale / 2 : Vector3.zero);
+               (center ? new Vector3(1, 0, 1) * scale / 2 : Vector3.zero);
     }
 
     public Vector3 RealVec(Vector2Int vec) {
@@ -152,7 +168,7 @@ public class WorldGrid : MonoBehaviour {
     public bool CanPlaceAt(Vector2Int pos, Vector2Int size) {
         for (var y = pos.y; y < pos.y + size.y; y++) {
             for (var x = pos.x; x < pos.x + size.x; x++) {
-                if (x < 0 || y < 0 || x >= width || y >= height || !cells[y, x].isWalkable) return false;
+                if (x < 0 || y < 0 || x >= width || y >= height || !cells[y, x].isBuildable) return false;
             }
         }
 

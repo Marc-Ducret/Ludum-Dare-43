@@ -697,7 +697,7 @@ MonoBehaviour:
   m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: b9ddc444b9b3cb644b545d56f40fc8d3, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 0.11764706}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
@@ -1631,7 +1631,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1224554144}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4, y: 0.4, z: 4}
+  m_LocalPosition: {x: -23.9, y: 0, z: -23.4}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_Children: []
   m_Father: {fileID: 767665596}
@@ -2597,3 +2597,7 @@ MonoBehaviour:
   width: 100
   height: 100
   scale: 3.2
+  treeCount: 100
+  treePrefab: {fileID: 3162505772712824356, guid: e1e7364fc4ea9a94d8a4ccf759f7a383,
+    type: 3}
+  minDist: 20
