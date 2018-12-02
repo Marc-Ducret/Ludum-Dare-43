@@ -147,6 +147,16 @@ public class WorldGrid : MonoBehaviour {
         return path;
     }
 
+    public List<float> ComputeDistances(Vector2Int origin, List<Vector2Int> targets) {
+        // TODO: do something smarter than n A*
+        List<float> distances = new List<float>();
+        foreach (Vector2Int target in targets) {
+            PathInfo[,] path = AStar(origin, target);
+            distances.Add(path == null ? Mathf.Infinity : path[target.y, target.x].distance);
+        }
+        return distances;
+    }
+
     public List<Vector2Int> Path(Vector2Int origin, Vector2Int target) {
         PathInfo[,] path = AStar(origin, target);
 
@@ -222,21 +232,46 @@ public class WorldGrid : MonoBehaviour {
         }
     }
 
-    public struct DistantB<B> where B : Building {
-        B b;
-        Vector2Int pos; // Interaction position
+    public struct DistantB<B> : IComparable<DistantB<B>> where B : Building {
+        public B b;
+        public Vector2Int pos; // Interaction position
+        public float distance; // Distance from origin
+
+        public DistantB(B b, Vector2Int pos, float distance) {
+            this.b = b;
+            this.pos = pos;
+            this.distance = distance;
+        }
+
+        public int CompareTo(DistantB<B> other) {
+            return this.distance.CompareTo(other.distance);
+        }
     }
 
     // Returns all buildings of type B, sorted by increasing distance from pos
     public IEnumerable<DistantB<B>> Buildings<B>(Vector2Int pos) where B : Building {
-        List<DistantB<B>> bs = new List<DistantB<B>>;
+        List<DistantB<B>> bs = new List<DistantB<B>>();
         foreach (B b in Buildings<B>()) {
             List<Vector2Int> positions = b.InteractionPositions();
-            // Get best position
+            List<float> distances = ComputeDistances(pos, positions);
 
-            bs.Add(b);
+            // Get best position
+            int best = -1;
+            float bestDistance = Mathf.Infinity;
+            for (int i = 0; i < distances.Count; i++) {
+                if (distances[i] < bestDistance) {
+                    best = i;
+                    bestDistance = distances[i];
+                }
+            }
+
+            // Skip unreachable buildings
+            if (best == -1) continue;
+
+            bs.Add(new DistantB<B>(b, positions[best], bestDistance));
         }
 
-        bs.Sort()
+        bs.Sort();
+        return bs;
     }
 }

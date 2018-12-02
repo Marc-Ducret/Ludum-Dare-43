@@ -5,7 +5,7 @@ using UnityEngine;
 
 // TODOs:
 // - recompute paths when a new building is created/destroyed
-// - consider buildings from closest to furthest
+// - findbuilding can be optimized to only compute distances of interesting buildings, and only return the closest instead of sorting them
 // - go to buildings that will soon become harvestable / wait at points of interest
 
 public class Worker : MonoBehaviour {
@@ -74,22 +74,19 @@ public class Worker : MonoBehaviour {
     // Yields action to go to a building with the required predicate. Returns null until the last step, which is the found building.
     IEnumerable<B> FindBuilding<B>(Func<B, bool> pred) where B : Building {
         while (true) {
-            foreach (B b in WorldGrid.instance.Buildings<B>()) {
-                if (!pred(b)) continue;
+            foreach (WorldGrid.DistantB<B> b in WorldGrid.instance.Buildings<B>(WorldGrid.instance.GridPos(transform.position)) {
+                if (!pred(b.b)) continue; // Move on to next closest building
 
-                // We have a building, see if we can reach it.
-                Vector2Int target = b.pos; // TODO find better position
-                foreach (int i in MoveTo(target)) {
+                // We have a building, now go to it.
+                foreach (int i in MoveTo(b.pos)) {
                     yield return null;
                 }
-                // If we didn't find a path to the building, try another
-                if (currentPath == null) continue;
 
                 // Now that we are near the building, check if the predicate is still true
-                if (!pred(b)) continue;
+                if (!pred(b.b)) break; // Recompute all buildings now that we moved
 
-                // We are at the right position to harvest!
-                yield return b;
+                // We are near a building with a true predicate!
+                yield return b.b;
                 yield break;
             }
         }
@@ -127,11 +124,5 @@ public class Worker : MonoBehaviour {
     // Update is called once per frame
     void Update() {
 
-    }
-
-    private void OnValidate() {
-        if (WorldGrid.instance != null) {
-            moveTo(target);
-        }
     }
 }
