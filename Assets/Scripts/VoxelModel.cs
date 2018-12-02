@@ -177,6 +177,7 @@ public class VoxelModel : MonoBehaviour {
                 origin + transform.TransformVector(voxel.pos) + Vector3.one * .5F,
                 transform.rotation
             );
+            particle.transform.localScale = transform.lossyScale;
             particle.AddExplosionForce(force, groundCenter, Size.magnitude);
             SetMeshColor(particle.GetComponent<MeshFilter>().mesh, voxel.color);
 

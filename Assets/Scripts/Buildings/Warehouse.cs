@@ -77,8 +77,10 @@ public class Warehouse : Building {
         wPos += offset / 2.5f;
         Transform resourcePrefab;
         if (elementType == Resource.Food) resourcePrefab = foodPrefab;
-        else resourcePrefab = woodPrefab; 
-        return Instantiate(resourcePrefab, wPos, Quaternion.identity);
+        else resourcePrefab = woodPrefab;
+        var elem = Instantiate(resourcePrefab, wPos, Quaternion.identity);
+        elem.parent = transform;
+        return elem;
     }
     
     private void EraseElement(int index) {
