@@ -1,0 +1,7 @@
+# Goxel 0.8.0
+# One line per voxel
+# X Y Z RRGGBB
+4 -5 1 000000
+4 -4 1 000000
+4 -5 2 000000
+4 -5 3 629afe

@@ -1,0 +1,19 @@
+# Goxel 0.8.0
+# One line per voxel
+# X Y Z RRGGBB
+3 -1 5 8f563b
+3 -5 6 a2c1f8
+3 -4 6 eec39a
+3 -3 6 eec39a
+3 -2 6 eec39a
+3 -1 6 8f563b
+3 -1 7 8f563b
+3 -1 8 8f563b
+1 -1 9 aaa3ac
+2 -1 9 aaa3ac
+3 -1 9 aaa3ac
+4 -1 9 aaa3ac
+5 -1 9 aaa3ac
+1 0 9 aaa3ac
+3 0 9 aaa3ac
+5 0 9 aaa3ac

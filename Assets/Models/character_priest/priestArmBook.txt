@@ -1,0 +1,16 @@
+# Goxel 0.8.0
+# One line per voxel
+# X Y Z RRGGBB
+7 -5 6 222033
+7 -4 6 222033
+7 -3 6 222033
+7 -2 6 eec39a
+7 -1 6 ea6a6a
+7 -1 7 ea6a6a
+7 -1 8 ea6a6a
+6 0 6 ea6a6a
+7 0 6 ea6a6a
+6 0 7 ea6a6a
+7 0 7 ea6a6a
+6 0 8 ea6a6a
+7 0 8 ea6a6a
