@@ -46,7 +46,7 @@ public class Warehouse : Building {
     
     private bool IsEmpty() {
         for (int i = 0; i < warehouseCapacity; i++) {
-            if (elements[i] != null) return false; 
+            if (elements[i] != null) return false;
         }
         return true; 
     }

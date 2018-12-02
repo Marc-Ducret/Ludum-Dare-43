@@ -79,6 +79,12 @@ public class WorldGrid : MonoBehaviour {
         cells = new Cell[height, width];
         zero = Vector3.ProjectOnPlane(transform.position, Vector3.up) - scale / 2 * new Vector3(width, 0, height);
         buildings = new List<Building>();
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                cells[y, x].isBuildable = true;
+                cells[y, x].isWalkable = true;
+            }
+        }
     }
 
     private void PlaceTrees() {
@@ -95,9 +101,11 @@ public class WorldGrid : MonoBehaviour {
         var model = GetComponent<VoxelModel>();
         for (var y = 0; y < height; y++) {
             for (var x = 0; x < width; x++) {
-                var clear = model.Voxels[x, 0, y].color.a > 0;
-                cells[y, x].isBuildable = clear;
-                cells[y, x].isWalkable = clear;
+                if (model.Voxels[x, 0, y].color.a < 1) {
+                    cells[y, x].isBuildable = false;
+                    cells[y, x].isWalkable = false;
+                }
+                
             }
         }
         PlaceTrees();
@@ -286,5 +294,18 @@ public class WorldGrid : MonoBehaviour {
 
         bs.Sort();
         return bs;
+    }
+
+    public bool drawWalkable;
+    private void OnDrawGizmos() {
+        if (drawWalkable) {
+            for (var y = 0; y < height; y++) {
+                for (var x = 0; x < width; x++) {
+                    Vector3 pos = RealPos(new Vector2Int(x, y));
+                    Gizmos.color = cells[y, x].isWalkable ? Color.green : Color.red;
+                    Gizmos.DrawCube(pos, Vector3.one);
+                } 
+            }
+        }
     }
 }
