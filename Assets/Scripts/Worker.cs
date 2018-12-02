@@ -69,7 +69,7 @@ public class Worker : MonoBehaviour {
                     Debug.Assert(warehouse.AddElement(Resource.Food), "Storing failed");
                     animation.Drop();
                     yield return 0;
-
+ 
                     // TODO: change model to farmer without corn
                 }
         }
