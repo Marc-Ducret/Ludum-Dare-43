@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(VoxelModel))]
 public class WorldGrid : MonoBehaviour {
 
     public static WorldGrid instance;
@@ -15,8 +16,9 @@ public class WorldGrid : MonoBehaviour {
     public static float roadFactor = 3f;
 
     public struct Cell {
-        public bool isObstacle;
+        public bool isWalkable;
         public bool isRoad;
+        public bool isBuildable;
     }
 
     public struct Position : IComparable<Position> {
@@ -70,7 +72,15 @@ public class WorldGrid : MonoBehaviour {
         Debug.Log("Center of (0,0) cell: " + zero.ToString());
     }
 
-    private void Update() {
+    private void Start() {
+        var model = GetComponent<VoxelModel>();
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                var clear = model.Voxels[x, 0, y].color.a > 0;
+                cells[y, x].isBuildable = clear;
+                cells[y, x].isWalkable = clear;
+            }
+        }
     }
 
     public List<Neighbor> Neighbors(Vector2Int pos) {
@@ -81,7 +91,7 @@ public class WorldGrid : MonoBehaviour {
                 Vector2Int delta = new Vector2Int(x, y);
                 Vector2Int next = pos + delta;
                 float dist = delta.magnitude;
-                if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height && dist != 0 && !cells[next.y, next.x].isObstacle) {
+                if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height && dist != 0 && !cells[next.y, next.x].isWalkable) {
                     neighbors.Add(new Neighbor(next, dist));
                 }
             }
@@ -142,7 +152,7 @@ public class WorldGrid : MonoBehaviour {
     public bool CanPlaceAt(Vector2Int pos, Vector2Int size) {
         for (var y = pos.y; y < pos.y + size.y; y++) {
             for (var x = pos.x; x < pos.x + size.x; x++) {
-                if (x < 0 || y < 0 || x >= width || y >= height || cells[y, x].isObstacle) return false;
+                if (x < 0 || y < 0 || x >= width || y >= height || !cells[y, x].isWalkable) return false;
             }
         }
 
@@ -150,14 +160,15 @@ public class WorldGrid : MonoBehaviour {
     }
 
     public void AddBuilding(Building b) {
-        Debug.Log("Adding building " + b + " at " + b.pos.ToString() + " size " + b.size.ToString());
         for (int y = b.pos.y; y < b.pos.y + b.size.y; y++) {
             for (int x = b.pos.x; x < b.pos.x + b.size.x; x++) {
                 if (b is Road) {
                     cells[y, x].isRoad = true;
                 } else {
-                    cells[y, x].isObstacle = true;
+                    cells[y, x].isWalkable = false;
                 }
+
+                cells[y, x].isBuildable = false;
             }
         }
     }
