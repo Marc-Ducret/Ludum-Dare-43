@@ -14,7 +14,6 @@ public class AnimateBody : MonoBehaviour {
     public float acting;
     public bool holding;
     
-    
     private void Start() {
         var body = transform.Find("Body");
         armRight = body.Find("ArmRight");

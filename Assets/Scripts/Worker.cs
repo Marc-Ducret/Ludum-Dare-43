@@ -8,12 +8,15 @@ using UnityEngine;
 // - findbuilding can be optimized to only compute distances of interesting buildings, and only return the closest instead of sorting them
 // - go to buildings that will soon become harvestable / wait at points of interest
 
+[RequireComponent(typeof(AnimateBody))]
 public class Worker : MonoBehaviour {
     public enum Job { Farmer, Builder, Breeder, Priest, Logger };
     public Job job = Job.Farmer;
     public float baseVelocity = 3f;
     private float currentVelocity;
     public float height = 0f;
+
+    private AnimateBody animation;
 
     List<Vector2Int> currentPath;
     int currentPathPos;
@@ -28,7 +31,7 @@ public class Worker : MonoBehaviour {
         target = WorldGrid.instance.GridPos(transform.position);
         actions = Actions().GetEnumerator();
         currentVelocity = baseVelocity;
-        //Debug.Log("Starting on " + target.ToString());
+        animation = GetComponent<AnimateBody>();
     }
 
     IEnumerable<int> Actions() {
@@ -45,10 +48,10 @@ public class Worker : MonoBehaviour {
                         }
                     }
 
-                    // Harvest, TODO animation?
                     Debug.Assert(field.harvest(), "Harvest failed");
-                    yield return 0;
-
+                    animation.acting = 1;
+                    while (animation.acting > 0) yield return 0;
+                    animation.holding = true;
                     // TODO: change model to farmer holding corn
 
                     // Find a suitable warehouse
@@ -62,8 +65,8 @@ public class Worker : MonoBehaviour {
                         }
                     }
 
-                    // Store, TODO animation?
                     Debug.Assert(warehouse.AddElement(Resource.Food), "Storing failed");
+                    animation.holding = false;
                     yield return 0;
 
                     // TODO: change model to farmer without corn
@@ -125,8 +128,11 @@ public class Worker : MonoBehaviour {
             Vector3 delta = WorldGrid.instance.RealPos(currentPath[currentPathPos], height) - transform.position;
             delta = delta * Mathf.Min(1, currentVelocity * Time.deltaTime / delta.magnitude);
             transform.position += delta;
+            animation.velocity = delta / Time.deltaTime;
             yield return 0;
         }
+
+        animation.velocity = Vector3.zero;
     }
 
     // Update is called once per frame

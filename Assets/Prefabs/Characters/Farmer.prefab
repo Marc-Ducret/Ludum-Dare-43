@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 32012834976603198}
   - component: {fileID: 32012834976603194}
+  - component: {fileID: 4237310964766333756}
   m_Layer: 0
   m_Name: Farmer
   m_TagString: Untagged
@@ -46,9 +47,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   job: 0
-  velocity: 5
+  baseVelocity: 3
   height: 0
   target: {x: 0, y: 0}
+--- !u!114 &4237310964766333756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 32012834976603199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 51da341734ea3e44ba2fde1f5eb47156, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxVelocity: 1
+  smooth: 0.25
+  animationSpeed: 0.75
+  velocity: {x: 0, y: 0}
+  acting: 0
+  holding: 0
 --- !u!1 &34522850137182802
 GameObject:
   m_ObjectHideFlags: 0
