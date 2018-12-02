@@ -1,0 +1,13 @@
+# Goxel 0.8.0
+# One line per voxel
+# X Y Z RRGGBB
+3 -3 7 faf136
+4 -3 7 faf136
+5 -3 7 faf136
+6 -3 7 faf136
+7 -3 7 98e44f
+3 -2 7 faf136
+4 -2 7 faf136
+5 -2 7 faf136
+6 -2 7 faf136
+7 -2 7 98e44f

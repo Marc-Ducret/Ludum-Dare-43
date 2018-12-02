@@ -52,7 +52,7 @@ public class Worker : MonoBehaviour {
                     Debug.Assert(field.harvest(), "Harvest failed");
                     animation.acting = 1;
                     while (animation.acting > 0) yield return 0;
-                    animation.holding = true;
+                    animation.Hold(Resource.Food);
                     // TODO: change model to farmer holding corn
 
                     // Find a suitable warehouse
@@ -67,7 +67,7 @@ public class Worker : MonoBehaviour {
                     }
 
                     Debug.Assert(warehouse.AddElement(Resource.Food), "Storing failed");
-                    animation.holding = false;
+                    animation.Drop();
                     yield return 0;
 
                     // TODO: change model to farmer without corn
@@ -129,7 +129,8 @@ public class Worker : MonoBehaviour {
             Vector3 delta = WorldGrid.instance.RealPos(currentPath[currentPathPos], height) - transform.position;
             delta = delta * Mathf.Min(1, currentVelocity * Time.deltaTime / delta.magnitude);
             transform.position += delta;
-            animation.velocity = delta / Time.deltaTime;
+            animation.velocity.x = delta.x / Time.deltaTime;
+            animation.velocity.y = delta.z / Time.deltaTime;
             yield return 0;
         }
 

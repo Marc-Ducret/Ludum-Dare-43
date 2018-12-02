@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 5529161066980595321}
   - component: {fileID: 5529161066980595302}
   - component: {fileID: 5529161066980595303}
+  - component: {fileID: 6100048404642915910}
   m_Layer: 0
-  m_Name: FoodStorage
+  m_Name: WoodHarvest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46,8 +47,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b434b309bbc62443949d126106fd2ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  model: {fileID: 4900000, guid: 0fd610ac938680c47a581ba94f8878bd, type: 3}
-  horizontalCenter: 0
+  model: {fileID: 4900000, guid: 23a8c14f8cfc8e94da26edc766b95f6d, type: 3}
+  horizontalCenter: 1
   noDownFaces: 0
   colorNoise: 0.05
   particlePrefab: {fileID: 5640653648253450711, guid: fbb7f09a5b8860e49b2d5addc66f9c38,
@@ -97,3 +98,18 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &6100048404642915910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5529161066980595301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: cbb5c10a29ef8ae4a975bc2cf930666a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pos: {x: 0, y: 0}
+  size: {x: 1, y: 1}
