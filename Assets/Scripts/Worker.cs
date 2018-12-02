@@ -53,7 +53,7 @@ public class Worker : MonoBehaviour {
 
                     // Find a suitable warehouse
                     Warehouse warehouse = null;
-                    foreach (Warehouse w in FindBuilding<Warehouse>(w => w.acceptCorn())) {
+                    foreach (Warehouse w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Food))) {
                         if (w == null) {
                             yield return 0;
                         }
@@ -63,7 +63,7 @@ public class Worker : MonoBehaviour {
                     }
 
                     // Store, TODO animation?
-                    Debug.Assert(warehouse.storeCorn(), "Storing failed");
+                    Debug.Assert(warehouse.AddElement(Resource.Food), "Storing failed");
                     yield return 0;
 
                     // TODO: change model to farmer without corn
@@ -74,7 +74,7 @@ public class Worker : MonoBehaviour {
     // Yields action to go to a building with the required predicate. Returns null until the last step, which is the found building.
     IEnumerable<B> FindBuilding<B>(Func<B, bool> pred) where B : Building {
         while (true) {
-            foreach (WorldGrid.DistantB<B> b in WorldGrid.instance.Buildings<B>(WorldGrid.instance.GridPos(transform.position)) {
+            foreach (WorldGrid.DistantB<B> b in WorldGrid.instance.Buildings<B>(WorldGrid.instance.GridPos(transform.position))) {
                 if (!pred(b.b)) continue; // Move on to next closest building
 
                 // We have a building, now go to it.

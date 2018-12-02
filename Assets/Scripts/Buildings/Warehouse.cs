@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum Resource { Food, Wood }
 
-public class Storage : Building {
+public class Warehouse : Building {
     private static int warehouseCapacity = 36;
     private Transform[] elements = new Transform[warehouseCapacity];
     private Resource elementType;
