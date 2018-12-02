@@ -1,0 +1,9 @@
+Fix placement of resources in warehouse
+Recompute current paths of AIs if a new building is created/destroyed
+Optimize A*/Tree finder
+Night
+Eating/Sleeping
+Breeders
+Builders
+
+God gameplay: faith, cataclysm

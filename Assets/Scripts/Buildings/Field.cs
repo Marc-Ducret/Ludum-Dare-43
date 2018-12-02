@@ -19,6 +19,7 @@ public class Field : Building {
     new void Start() {
         base.Start();
         VoxelModel[] models = GetComponentsInChildren<VoxelModel>();
+        models = models.Skip(1).ToArray();
 
         corn = new Corn[models.Length];
 
