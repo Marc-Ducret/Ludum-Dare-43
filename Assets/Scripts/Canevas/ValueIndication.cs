@@ -5,17 +5,17 @@ using UnityEngine.UI;
 using System;
 
 public class ValueIndication : MonoBehaviour {
-    public Text txt;
-    public int maxValue;
-    private string buttonName; 
+    //public Text txt;
+    public float value;
+    private float width;
+    private RectTransform trans;     
 
-    // Start is called before the first frame update
-    void Start() {
-        buttonName = txt.text; 
-        txt.text = buttonName + Convert.ToString(maxValue);
+    public void Start() {
+        trans = GetComponent<RectTransform>();
+        width = trans.rect.width;
     }
 
-    // Update is called once per frame
-    void Update() {
+    public void Update() {
+        trans.offsetMax = new Vector2(trans.offsetMin.x + width * value, trans.offsetMax.y);
     }
 }

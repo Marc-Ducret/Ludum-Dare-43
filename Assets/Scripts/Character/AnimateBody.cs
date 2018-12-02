@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class AnimateBody : MonoBehaviour {
 
-    private Transform armLeft, armRight, legLeft, legRight;
+    private Transform armLeft, armRight, legLeft, legRight, harvestHolder;
+    private Transform harvest;
 
     public float maxVelocity;
     public float smooth;
@@ -12,11 +13,14 @@ public class AnimateBody : MonoBehaviour {
 
     public Vector2 velocity;
     public float acting;
-    public bool holding;
+    private bool holding;
+
+    public Transform[] harvestPrefabs;
     
     private void Start() {
         var body = transform.Find("Body");
         armRight = body.Find("ArmRight");
+        harvestHolder = armRight.Find("Harvest");
         armLeft  = body.Find("ArmLeft");
         legRight = body.Find("LegRight");
         legLeft  = body.Find("LegLeft");
@@ -59,5 +63,19 @@ public class AnimateBody : MonoBehaviour {
                 Time.deltaTime / smooth
             );
         }
+    }
+
+    public void Hold(Resource res) {
+        Drop();
+        harvest = Instantiate(harvestPrefabs[(int) res], harvestHolder);
+        holding = true;
+    }
+
+    public void Drop() {
+        if (harvest != null) {
+            Destroy(harvest.gameObject);
+            harvest = null;
+        }
+        holding = false;
     }
 }
