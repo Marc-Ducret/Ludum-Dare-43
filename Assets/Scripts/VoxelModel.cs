@@ -190,6 +190,7 @@ public class VoxelModel : MonoBehaviour {
             if (v.pos.y == 0) {
                 v.depth = 0;
                 toVisit.Enqueue(v);
+                visited.Add(v);
                 Voxels[v.pos.x, v.pos.y, v.pos.z] = v;
             }
         }
