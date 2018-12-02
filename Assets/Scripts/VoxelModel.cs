@@ -107,14 +107,14 @@ public class VoxelModel : MonoBehaviour {
         var triangles = new List<int>();
 
         foreach (var voxel in VoxelsList) {
-            if (maxDepth >= 0 && voxel.depth > maxDepth) continue;
+//            if (maxDepth >= 0 && voxel.depth > maxDepth) continue;
 
             for (var sign = +1; sign >= -1; sign -= 2) {
                 for (var shift = 0; shift < 3; shift++) {
                     if (shift == 1 && sign == 1 && noDownFaces) continue;
                     var dir = Voxel.Axis[shift] * -sign;
                     var neighbour = GetVoxel(voxel.pos + dir);
-                    if (neighbour.depth <= maxDepth && neighbour.color.a > 0) continue;
+                    if ((maxDepth < 0 || neighbour.depth <= maxDepth) && neighbour.color.a > 0) continue;
                     Func<float, float> colorComp = x => Mathf.Clamp(x + (Random.value - .5f) * 2 * colorNoise, 0, 1);
                     float h, s, v;
                     Color.RGBToHSV(voxel.color, out h, out s, out v);
@@ -196,7 +196,7 @@ public class VoxelModel : MonoBehaviour {
                 Voxels[v.pos.x, v.pos.y, v.pos.z] = v;
             }
         }
-
+        
         while (toVisit.Count > 0) {
             Voxel v = toVisit.Dequeue();
             for (var sign = +1; sign >= -1; sign -= 2) {
@@ -210,7 +210,7 @@ public class VoxelModel : MonoBehaviour {
                     next.depth = v.depth + 1;
                     toVisit.Enqueue(next);
                     visited.Add(next);
-                    Voxels[next.pos.x, next.pos.y, next.pos.z] = v;
+                    Voxels[next.pos.x, next.pos.y, next.pos.z] = next;
                 }
             }
         }
