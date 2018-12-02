@@ -11,6 +11,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Farmer
       objectReference: {fileID: 0}
+    - target: {fileID: 8225355981523129904}
+      propertyPath: job
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8225355981523129908}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -55,6 +59,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8225355981523129909}
+      propertyPath: m_Name
+      value: Farmer
+      objectReference: {fileID: 0}
+    - target: {fileID: 32012834976603199, guid: 37224c4d12a43274bb7eddef5f4f49bc,
+        type: 3}
+      propertyPath: m_Name
+      value: Farmer
+      objectReference: {fileID: 0}
+    - target: {fileID: 32012834976603194, guid: 37224c4d12a43274bb7eddef5f4f49bc,
+        type: 3}
+      propertyPath: job
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37224c4d12a43274bb7eddef5f4f49bc, type: 3}
 --- !u!1 &8225355981523129909 stripped
@@ -69,3 +87,16 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 8239315931291617802}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8225355981523129904 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 32012834976603194, guid: 37224c4d12a43274bb7eddef5f4f49bc,
+    type: 3}
+  m_PrefabInstance: {fileID: 8239315931291617802}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8225355981523129909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: b7bb109ec2539d14cbec4b56419b54a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -8,7 +8,7 @@ public struct Voxel {
     public Vector3Int pos;
     public readonly Color color;
     public int depth;
-    
+
     public Voxel(Vector3Int pos, Color color) {
         this.pos = pos;
         this.color = color;
@@ -23,7 +23,7 @@ public struct Voxel {
 
     }
 
-    public static readonly Vector3Int[] Axis = {Vector3Int.right, Vector3Int.up, new Vector3Int(0, 0, 1)};
+    public static readonly Vector3Int[] Axis = { Vector3Int.right, Vector3Int.up, new Vector3Int(0, 0, 1) };
 
     public Vector3Int TriangleVertex(int shift, int mask, bool invert) {
         Vector3Int offset;
@@ -31,10 +31,11 @@ public struct Voxel {
             offset = Axis[(shift + 2) % 3] * ((mask >> 0) & 1) +
                      Axis[(shift + 1) % 3] * ((mask >> 4) & 1);
             offset = Vector3Int.one - offset;
-        } else {
+        }
+        else {
             offset = Axis[(shift + 1) % 3] * ((mask >> 0) & 1) +
                      Axis[(shift + 2) % 3] * ((mask >> 4) & 1);
-            
+
         }
         return pos + offset;
     }
@@ -48,7 +49,7 @@ public class VoxelModel : MonoBehaviour {
     public float colorNoise;
 
     public Rigidbody particlePrefab;
-    
+
     private Mesh mesh;
 
     public Vector3Int Size { get; private set; }
@@ -107,7 +108,7 @@ public class VoxelModel : MonoBehaviour {
         var triangles = new List<int>();
 
         foreach (var voxel in VoxelsList) {
-//            if (maxDepth >= 0 && voxel.depth > maxDepth) continue;
+            if (maxDepth >= 0 && voxel.depth > maxDepth) break;
 
             for (var sign = +1; sign >= -1; sign -= 2) {
                 for (var shift = 0; shift < 3; shift++) {
@@ -119,7 +120,7 @@ public class VoxelModel : MonoBehaviour {
                     float h, s, v;
                     Color.RGBToHSV(voxel.color, out h, out s, out v);
                     var vColor = Color.HSVToRGB(h, colorComp(s), colorComp(v));
-                    
+
                     for (var i = 0; i < 4; i++) {
                         normals.Add(dir);
                         colors.Add(vColor);
@@ -132,14 +133,14 @@ public class VoxelModel : MonoBehaviour {
                     triangles.Add(v00);
                     triangles.Add(v11);
                     triangles.Add(v01);
-                    
+
                     triangles.Add(v00);
                     triangles.Add(v10);
                     triangles.Add(v11);
                 }
             }
         }
-        
+
         var offset = horizontalCenter ? Vector3.ProjectOnPlane(Size, Vector3.up) / 2 : Vector3.zero;
         mesh.Clear();
         mesh.vertices = vertices.ConvertAll(v => v - offset).ToArray();
@@ -170,7 +171,7 @@ public class VoxelModel : MonoBehaviour {
         var origin = transform.position;
         if (horizontalCenter) origin -= Vector3.ProjectOnPlane(Size, Vector3.up) / 2;
         else groundCenter += Vector3.ProjectOnPlane(Size, Vector3.up) / 2;
-        foreach(var voxel in VoxelsList) {
+        foreach (var voxel in VoxelsList) {
             var particle = Instantiate(
                 particlePrefab,
                 origin + transform.TransformVector(voxel.pos) + Vector3.one * .5F,
@@ -178,7 +179,7 @@ public class VoxelModel : MonoBehaviour {
             );
             particle.AddExplosionForce(force, groundCenter, Size.magnitude);
             SetMeshColor(particle.GetComponent<MeshFilter>().mesh, voxel.color);
-            
+
             Destroy(particle.gameObject, 500);
         }
         Destroy(gameObject);
@@ -196,7 +197,7 @@ public class VoxelModel : MonoBehaviour {
                 Voxels[v.pos.x, v.pos.y, v.pos.z] = v;
             }
         }
-        
+
         while (toVisit.Count > 0) {
             Voxel v = toVisit.Dequeue();
             for (var sign = +1; sign >= -1; sign -= 2) {
