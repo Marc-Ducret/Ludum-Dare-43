@@ -8,11 +8,12 @@ public class Storage : Building {
     private static int warehouseCapacity = 36;
     private Transform[] elements = new Transform[warehouseCapacity];
     private Resource elementType;
-    public Transform resourcePrefab;
+    public Transform woodPrefab;
+    public Transform foodPrefab;
 
     private new void Start() {
         base.Start();
-        for(var i = 0; i < 20; i++) print(AddElement(Resource.Wood));
+        for(var i = 0; i < 20; i++) print(AddElement(Resource.Food));
     }
     
     public bool AddElement(Resource elemType) { //False : Full warehouse or bad element type
@@ -66,6 +67,9 @@ public class Storage : Building {
         
         var offset = new Vector3(2 + (i % 2) * 8 + (j % 3) * 2, 1, 2 + (i / 2) * 8 + (j / 3) * 2);
         wPos += offset / 2.5f;
+        Transform resourcePrefab;
+        if (elementType == Resource.Food) resourcePrefab = foodPrefab;
+        else resourcePrefab = woodPrefab; 
         return Instantiate(resourcePrefab, wPos, Quaternion.identity);
     }
     

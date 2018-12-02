@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5529161066980595303}
   - component: {fileID: 6100048404642915910}
   m_Layer: 0
-  m_Name: WoodStorage
+  m_Name: FoodStorage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b434b309bbc62443949d126106fd2ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  model: {fileID: 4900000, guid: c0b6309bf946e694f80ef816aeccef46, type: 3}
+  model: {fileID: 4900000, guid: 0fd610ac938680c47a581ba94f8878bd, type: 3}
   horizontalCenter: 1
   noDownFaces: 0
   colorNoise: 0.05
