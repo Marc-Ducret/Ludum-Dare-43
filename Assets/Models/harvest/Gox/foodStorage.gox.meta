@@ -1,5 +1,13 @@
 fileFormatVersion: 2
+<<<<<<< Updated upstream:Assets/Models/harvest/Gox/foodStorage.gox.meta
 guid: a2ccca2063af82a498313985d7d1d116
+=======
+<<<<<<< Updated upstream
+guid: 274c40d8ee806dc4baed265aedc64989
+=======
+guid: f031ac625b5deb94e8b15b64d6158d77
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes:Assets/Models/harvest/foodStorage.gox.meta
 DefaultImporter:
   externalObjects: {}
   userData: 
