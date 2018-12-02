@@ -4,7 +4,7 @@ using UnityEngine;
  
 public class CameraMovement : MonoBehaviour
 {
-    public float speed = 3.0f;
+    public float speed = 5.0f;
     private int pixelDelta = 15;
     private int pixelLimit = 100;
     
@@ -15,21 +15,50 @@ public class CameraMovement : MonoBehaviour
 
     void Update()
     {
+        //Right
         if ((Input.mousePosition.x >= Screen.width - pixelDelta) && (Input.mousePosition.x <= Screen.width + pixelLimit))
         {
-            transform.position += Vector3.right * Time.deltaTime * speed;
+            Move(Vector3.right);
+            //Right + Forward
+            if ((Input.mousePosition.y >= Screen.height - pixelDelta) && (Input.mousePosition.y <= Screen.height + pixelLimit))
+            {
+                Move(Vector3.forward);
+            }
+            //Right + Back
+            else if ((Input.mousePosition.y <= pixelDelta) && (Input.mousePosition.y >= -pixelLimit))
+            {
+                Move(Vector3.back);
+            }
         }
+        //Left
         else if ((Input.mousePosition.x <= pixelDelta) && (Input.mousePosition.x >= -pixelLimit))
         {
-            transform.position += Vector3.left * Time.deltaTime * speed;
+            Move(Vector3.left);
+            //Left + Forward
+            if ((Input.mousePosition.y >= Screen.height - pixelDelta) && (Input.mousePosition.y <= Screen.height + pixelLimit))
+            {
+                Move(Vector3.forward);
+            }
+            //Left + Back
+            else if ((Input.mousePosition.y <= pixelDelta) && (Input.mousePosition.y >= -pixelLimit))
+            {
+                Move(Vector3.back);
+            }
         }
+        //Forward
         else if ((Input.mousePosition.y >= Screen.height - pixelDelta) && (Input.mousePosition.y <= Screen.height + pixelLimit))
         {
-            transform.position += Vector3.forward * Time.deltaTime * speed;
+            Move(Vector3.forward);
         }
+        //Back
         else if ((Input.mousePosition.y <= pixelDelta) && (Input.mousePosition.y >= -pixelLimit))
         {
-            transform.position += Vector3.back * Time.deltaTime * speed;
+            Move(Vector3.back);
         }
+    }
+    
+    void Move(Vector3 direction)
+    {
+        transform.position += direction * Time.deltaTime * speed;
     }
 }
