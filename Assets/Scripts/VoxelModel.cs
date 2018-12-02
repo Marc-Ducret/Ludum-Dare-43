@@ -107,13 +107,14 @@ public class VoxelModel : MonoBehaviour {
         var triangles = new List<int>();
 
         foreach (var voxel in VoxelsList) {
-            if (maxDepth >= 0 && voxel.depth > maxDepth) break;
+            if (maxDepth >= 0 && voxel.depth > maxDepth) continue;
 
             for (var sign = +1; sign >= -1; sign -= 2) {
                 for (var shift = 0; shift < 3; shift++) {
                     if (shift == 1 && sign == 1 && noDownFaces) continue;
                     var dir = Voxel.Axis[shift] * -sign;
-                    if (GetVoxel(voxel.pos + dir).color.a > 0) continue;
+                    var neighbour = GetVoxel(voxel.pos + dir);
+                    if (neighbour.depth <= maxDepth && neighbour.color.a > 0) continue;
                     Func<float, float> colorComp = x => Mathf.Clamp(x + (Random.value - .5f) * 2 * colorNoise, 0, 1);
                     float h, s, v;
                     Color.RGBToHSV(voxel.color, out h, out s, out v);
@@ -140,6 +141,7 @@ public class VoxelModel : MonoBehaviour {
         }
         
         var offset = horizontalCenter ? Vector3.ProjectOnPlane(Size, Vector3.up) / 2 : Vector3.zero;
+        mesh.Clear();
         mesh.vertices = vertices.ConvertAll(v => v - offset).ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.normals = normals.ToArray();
