@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5529161066980595321}
   - component: {fileID: 5529161066980595302}
   - component: {fileID: 5529161066980595303}
-  - component: {fileID: 6100048404642915910}
+  - component: {fileID: 2419073090010895193}
   m_Layer: 0
   m_Name: Warehouse
   m_TagString: Untagged
@@ -50,6 +50,7 @@ MonoBehaviour:
   model: {fileID: 4900000, guid: 78199f6f43e3544429c250a164c861cd, type: 3}
   horizontalCenter: 0
   noDownFaces: 0
+  colorNoise: 0
   particlePrefab: {fileID: 5640653648253450711, guid: fbb7f09a5b8860e49b2d5addc66f9c38,
     type: 3}
 --- !u!33 &5529161066980595302
@@ -97,7 +98,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &6100048404642915910
+--- !u!114 &2419073090010895193
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -107,8 +108,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_GeneratorAsset: {fileID: 0}
-  m_Script: {fileID: 11500000, guid: cbb5c10a29ef8ae4a975bc2cf930666a, type: 3}
+  m_Script: {fileID: 11500000, guid: 07d231172f4497f42ba243adcc15bee2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pos: {x: 0, y: 0}
   size: {x: 2, y: 2}
+  resourcePrefab: {fileID: 5529161066980595300, guid: 20d2f2cc727cea8478ea53c9dcb0059f,
+    type: 3}

@@ -12,12 +12,7 @@ public class Storage : Building {
 
     private new void Start() {
         base.Start();
-        AddElement(Resource.Wood);
-        AddElement(Resource.Wood);
-        AddElement(Resource.Wood);
-        AddElement(Resource.Wood);
-        AddElement(Resource.Wood);
-        AddElement(Resource.Wood);
+        for(var i = 0; i < 20; i++) print(AddElement(Resource.Wood));
     }
     
     public bool AddElement(Resource elemType) { //False : Full warehouse or bad element type
@@ -69,7 +64,7 @@ public class Storage : Building {
         var i = index / 9;
         var j = index % 9;
         
-        var offset = new Vector3(1, 1 + (i % 2) * 8 + (j % 3) * 2, 1 + (i / 2) * 8 + (j / 3) * 2);
+        var offset = new Vector3(2 + (i % 2) * 8 + (j % 3) * 2, 1, 2 + (i / 2) * 8 + (j / 3) * 2);
         wPos += offset / 2.5f;
         return Instantiate(resourcePrefab, wPos, Quaternion.identity);
     }
