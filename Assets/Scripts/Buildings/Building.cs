@@ -6,7 +6,7 @@ public class Building : MonoBehaviour {
     [HideInInspector]
     public Vector2Int pos; // bottom left cell
     public Vector2Int size;
-    public static bool isWalkable = false;
+    public bool isWalkable = false;
 
     public void Start() {
         pos = WorldGrid.instance.GridPos(transform.position);

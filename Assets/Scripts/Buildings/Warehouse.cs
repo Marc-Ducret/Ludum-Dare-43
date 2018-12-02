@@ -13,7 +13,7 @@ public class Warehouse : Building {
 
     private new void Start() {
         base.Start();
-        for(var i = 0; i < 20; i++) print(AddElement(Resource.Food));
+        //for(var i = 0; i < 20; i++) print(AddElement(Resource.Food));
     }
     
     public bool AddElement(Resource elemType) { //False : Full warehouse or bad element type
@@ -46,17 +46,25 @@ public class Warehouse : Building {
     
     private bool IsEmpty() {
         for (int i = 0; i < warehouseCapacity; i++) {
-            if (elements[i]) return false; 
+            if (elements[i] != null) return false; 
         }
         return true; 
     }
+
+    private bool IsFull() {
+        for (int i = 0; i < warehouseCapacity; i++) {
+            if (elements[i] == null) return false;
+        }
+        return true;
+    }
+
 
     public bool Has(Resource elemType) {
         return !IsEmpty() && elementType == elemType;
     }
 
     public bool CanStore(Resource elemType) {
-        return IsEmpty() || elementType == elemType;
+        return (IsEmpty() || elementType == elemType) && !IsFull();
     }
 
     private Transform CreateElement(int index) {

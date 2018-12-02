@@ -13,7 +13,8 @@ public class Worker : MonoBehaviour {
     public enum Job { Farmer, Builder, Breeder, Priest, Logger };
     public Job job = Job.Farmer;
     public float baseVelocity = 3f;
-    private float currentVelocity;
+    
+    public float currentVelocity;
     public float height = 0f;
 
     private AnimateBody animation;

@@ -210,6 +210,7 @@ public class WorldGrid : MonoBehaviour {
     }
 
     public void AddBuilding(Building b) {
+        Debug.Log("Adding building " + b.ToString() + " walkable " + b.Walkable().ToString());
         for (int y = b.pos.y; y < b.pos.y + b.size.y; y++) {
             for (int x = b.pos.x; x < b.pos.x + b.size.x; x++) {
                 if (b is Road) {

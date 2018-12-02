@@ -5,10 +5,8 @@ using UnityEngine;
 
 public class Field : Building {
     private const int numCorn = 8;
-    float[] plantTimes; 
+    float[] plantTimes;
     public float matureTime = 15; // time in seconds
-
-    new public static bool isWalkable = true;
 
     // Start is called before the first frame update
     new void Start() {
