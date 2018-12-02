@@ -83,7 +83,7 @@ public class WorldGrid : MonoBehaviour {
             var y = Random.Range(0, height);
             var pos = new Vector2Int(x, y);
             if (cells[y, x].isBuildable && Vector2.Distance(pos, new Vector2Int(width / 2, height / 2)) > minDist)
-                Instantiate(treePrefab, RealPos(pos), Quaternion.identity);
+                Instantiate(treePrefab, RealPos(pos), Quaternion.identity).transform.parent = transform;
         }
     }
 
@@ -107,7 +107,7 @@ public class WorldGrid : MonoBehaviour {
                 Vector2Int delta = new Vector2Int(x, y);
                 Vector2Int next = pos + delta;
                 float dist = delta.magnitude;
-                if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height && dist != 0 && !cells[next.y, next.x].isWalkable) {
+                if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height && dist != 0 && cells[next.y, next.x].isWalkable) {
                     neighbors.Add(new Neighbor(next, dist));
                 }
             }
@@ -120,6 +120,11 @@ public class WorldGrid : MonoBehaviour {
         PathInfo[,] path = new PathInfo[height, width];
         PriorityQueue<Position> toVisit = new PriorityQueue<Position>();
         toVisit.Enqueue(new Position(origin, origin, 0, target));
+
+        if (!cells[target.y, target.x].isWalkable) {
+            Debug.LogError("Un-walkable target");
+            return null;
+        }
 
         while (toVisit.Count() > 0) {
             Position c = toVisit.Dequeue();
@@ -140,6 +145,7 @@ public class WorldGrid : MonoBehaviour {
         Vector2Int cur = target;
         while (cur != origin) {
             positions.Add(cur);
+            if (!path[cur.y, cur.x].visited) return null;
             cur = path[cur.y, cur.x].father;
         }
         positions.Reverse();
