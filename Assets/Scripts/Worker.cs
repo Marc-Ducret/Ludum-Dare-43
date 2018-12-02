@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 public class Worker : MonoBehaviour {
-    public enum Job { Farmer, Builder, Breeder, Priest };
+    public enum Job { Farmer, Builder, Breeder, Priest, Logger };
     public Job job = Job.Farmer;
     public float velocity = 3f;
     public float height = 0f;
