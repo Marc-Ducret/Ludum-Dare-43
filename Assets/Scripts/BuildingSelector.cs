@@ -17,13 +17,16 @@ public class BuildingSelector : MonoBehaviour {
 
     private void Update() {
         if (selected != null) {
-            if (Input.GetMouseButtonDown(1)) UpdateSelection(null);
+            if (Input.GetMouseButtonDown(1)) {
+                UpdateSelection(null);
+                return;
+            }
             var ray = camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             Physics.Raycast(ray, out hit, 100, mask);
             var grid = WorldGrid.instance;
             var gridPos = grid.GridPos(hit.point - grid.RealVec(selected.buildingPrefab.size) / 2);
-            var snapPosition = grid.RealPos(gridPos);
+            var snapPosition = grid.RealPos(gridPos, 0, false);
             ghost.transform.position = snapPosition;
             var canPlace = grid.CanPlaceAt(gridPos, selected.buildingPrefab.size);
             ghostMaterial.color = canPlace ? Color.green : Color.red;

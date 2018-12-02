@@ -10,7 +10,7 @@ public class WorldGrid : MonoBehaviour {
     public int width;
     public int height;
     public float scale;
-    private Vector3 zero; // origin of the grid, i.e. real-world coordinates of the center of the leftest-bottomest cell
+    private Vector3 zero; // origin of the grid, i.e. real-world coordinates of the leftest-bottomest cell
 
     public static float roadFactor = 3f;
 
@@ -66,7 +66,7 @@ public class WorldGrid : MonoBehaviour {
         if (instance != null) Debug.LogError("Multiples instances of Grid");
         instance = this;
         cells = new Cell[height, width];
-        zero = transform.position - scale/2 * new Vector3(width + 1, 0, height + 1);
+        zero = Vector3.ProjectOnPlane(transform.position, Vector3.up) - scale/2 * new Vector3(width, 0, height);
         Debug.Log("Center of (0,0) cell: " + zero.ToString());
     }
 
@@ -126,12 +126,13 @@ public class WorldGrid : MonoBehaviour {
     }
 
     public Vector2Int GridPos(Vector3 pos) {
-        Vector3 delta = (pos - zero) / scale + new Vector3(0.5f, 0f, 0.5f); // offset to the bottom-left of the (0,0) cell
+        Vector3 delta = (pos - zero) / scale; // offset to the bottom-left of the (0,0) cell
         return new Vector2Int((int)delta.x, (int)delta.z);
     }
 
-    public Vector3 RealPos(Vector2Int pos, float height = 0f) {
-        return zero + new Vector3(pos.x, height / scale, pos.y) * scale;
+    public Vector3 RealPos(Vector2Int pos, float height = 0f, bool center = true) {
+        return zero + new Vector3(pos.x, height / scale, pos.y) * scale +
+               (center ? Vector3.one * scale / 2 : Vector3.zero);
     }
 
     public Vector3 RealVec(Vector2Int vec) {
@@ -141,7 +142,7 @@ public class WorldGrid : MonoBehaviour {
     public bool CanPlaceAt(Vector2Int pos, Vector2Int size) {
         for (var y = pos.y; y < pos.y + size.y; y++) {
             for (var x = pos.x; x < pos.x + size.x; x++) {
-                if (cells[y, x].isObstacle) return false;
+                if (x < 0 || y < 0 || x >= width || y >= height || cells[y, x].isObstacle) return false;
             }
         }
 
