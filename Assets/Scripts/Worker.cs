@@ -74,6 +74,7 @@ public class Worker : MonoBehaviour {
     // Yields action to go to a building with the required predicate. Returns null until the last step, which is the found building.
     IEnumerable<B> FindBuilding<B>(Func<B, bool> pred) where B : Building {
         while (true) {
+            bool shouldWait = true;
             foreach (WorldGrid.DistantB<B> b in WorldGrid.instance.Buildings<B>(WorldGrid.instance.GridPos(transform.position))) {
                 if (!pred(b.b)) continue; // Move on to next closest building
 
@@ -83,11 +84,18 @@ public class Worker : MonoBehaviour {
                 }
 
                 // Now that we are near the building, check if the predicate is still true
-                if (!pred(b.b)) break; // Recompute all buildings now that we moved
+                if (!pred(b.b)) {
+                    shouldWait = false;
+                    break; // Recompute all buildings now that we moved
+                }
 
                 // We are near a building with a true predicate!
                 yield return b.b;
                 yield break;
+            }
+
+            if (shouldWait) {
+                yield return null;
             }
         }
     }
