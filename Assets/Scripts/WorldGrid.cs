@@ -140,7 +140,7 @@ public class WorldGrid : MonoBehaviour {
                 break;
             }
             foreach (Neighbor n in Neighbors(c.pos)) {
-                Position d = new Position(n.pos, c.pos, c.distanceFromOrigin + n.distance / (cells[c.pos.y, c.pos.x].isRoad && cells[n.pos.y, n.pos.x].isRoad ? 1 : roadFactor), target);
+                Position d = new Position(n.pos, c.pos, c.distanceFromOrigin + n.distance / (cells[c.pos.y, c.pos.x].isRoad ? roadFactor : 1), target);
                 toVisit.Enqueue(d);
             }
         }
