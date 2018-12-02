@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public struct Voxel {
     public Vector3Int pos;
@@ -40,30 +41,32 @@ public struct Voxel {
 
 [RequireComponent(typeof(MeshFilter))]
 public class VoxelModel : MonoBehaviour {
-    private Mesh mesh;
     public TextAsset model;
     public bool horizontalCenter;
     public bool noDownFaces;
-    private Voxel[,,] voxels;
-    private List<Voxel> voxelsList;
+    public float colorNoise;
 
     public Rigidbody particlePrefab;
+    
+    private Mesh mesh;
 
-    private Vector3Int size;
+    public Vector3Int Size { get; private set; }
+    public Voxel[,,] Voxels { get; private set; }
+    public List<Voxel> VoxelsList { get; private set; }
 
     private Voxel GetVoxel(Vector3Int pos) {
-        if (pos.x < 0 || pos.y < 0 || pos.z < 0 || pos.x >= size.x || pos.y >= size.y || pos.z >= size.z)
+        if (pos.x < 0 || pos.y < 0 || pos.z < 0 || pos.x >= Size.x || pos.y >= Size.y || pos.z >= Size.z)
             return new Voxel();
-        return voxels[pos.x, pos.y, pos.z];
+        return Voxels[pos.x, pos.y, pos.z];
     }
 
     private void ParseModel() {
-        voxelsList = new List<Voxel>();
+        VoxelsList = new List<Voxel>();
         foreach (var line in model.text.Split('\n')) {
             if (line.StartsWith("#")) continue;
             var tokens = line.Split(' ');
             if (tokens.Length < 4) continue;
-            voxelsList.Add(new Voxel(
+            VoxelsList.Add(new Voxel(
                 new Vector3Int(
                     int.Parse(tokens[0]),
                     int.Parse(tokens[2]),
@@ -73,18 +76,18 @@ public class VoxelModel : MonoBehaviour {
             ));
         }
 
-        var minBound = voxelsList[0].pos;
-        var maxBound = voxelsList[0].pos;
-        foreach (var voxel in voxelsList) {
+        var minBound = VoxelsList[0].pos;
+        var maxBound = VoxelsList[0].pos;
+        foreach (var voxel in VoxelsList) {
             minBound = Vector3Int.Min(voxel.pos, minBound);
             maxBound = Vector3Int.Max(voxel.pos, maxBound);
         }
 
-        size = maxBound - minBound + Vector3Int.one;
-        voxelsList = voxelsList.ConvertAll(v => new Voxel(v.pos - minBound, v.color));
-        voxels = new Voxel[size.x, size.y, size.z];
-        foreach (var v in voxelsList) {
-            voxels[v.pos.x, v.pos.y, v.pos.z] = v;
+        Size = maxBound - minBound + Vector3Int.one;
+        VoxelsList = VoxelsList.ConvertAll(v => new Voxel(v.pos - minBound, v.color));
+        Voxels = new Voxel[Size.x, Size.y, Size.z];
+        foreach (var v in VoxelsList) {
+            Voxels[v.pos.x, v.pos.y, v.pos.z] = v;
         }
     }
 
@@ -100,21 +103,26 @@ public class VoxelModel : MonoBehaviour {
 
         var triangles = new List<int>();
 
-        foreach (var v in voxelsList) {
+        foreach (var voxel in VoxelsList) {
             for (var sign = +1; sign >= -1; sign -= 2) {
                 for (var shift = 0; shift < 3; shift++) {
                     if (shift == 1 && sign == 1 && noDownFaces) continue;
                     var dir = Voxel.Axis[shift] * -sign;
-                    if (GetVoxel(v.pos + dir).color != new Color()) continue;
+                    if (GetVoxel(voxel.pos + dir).color.a > 0) continue;
+                    Func<float, float> colorComp = x => Mathf.Clamp(x + (Random.value - .5f) * 2 * colorNoise, 0, 1);
+                    float h, s, v;
+                    Color.RGBToHSV(voxel.color, out h, out s, out v);
+                    var vColor = Color.HSVToRGB(h, colorComp(s), colorComp(v));
+                    
                     for (var i = 0; i < 4; i++) {
                         normals.Add(dir);
-                        colors.Add(v.color);
+                        colors.Add(vColor);
                     }
 
-                    var v00 = idx(v.TriangleVertex(shift, 0x00, sign < 0));
-                    var v01 = idx(v.TriangleVertex(shift, 0x01, sign < 0));
-                    var v11 = idx(v.TriangleVertex(shift, 0x11, sign < 0));
-                    var v10 = idx(v.TriangleVertex(shift, 0x10, sign < 0));
+                    var v00 = idx(voxel.TriangleVertex(shift, 0x00, sign < 0));
+                    var v01 = idx(voxel.TriangleVertex(shift, 0x01, sign < 0));
+                    var v11 = idx(voxel.TriangleVertex(shift, 0x11, sign < 0));
+                    var v10 = idx(voxel.TriangleVertex(shift, 0x10, sign < 0));
                     triangles.Add(v00);
                     triangles.Add(v11);
                     triangles.Add(v01);
@@ -126,15 +134,15 @@ public class VoxelModel : MonoBehaviour {
             }
         }
         
-        var offset = horizontalCenter ? Vector3.ProjectOnPlane(size, Vector3.up) / 2 : Vector3.zero;
+        var offset = horizontalCenter ? Vector3.ProjectOnPlane(Size, Vector3.up) / 2 : Vector3.zero;
         mesh.vertices = vertices.ConvertAll(v => v - offset).ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.normals = normals.ToArray();
         mesh.colors = colors.ToArray();
     }
 
-    [ContextMenu("Start")]
-    private void Start() {
+    [ContextMenu("Awake")]
+    private void Awake() {
         mesh = new Mesh();
         mesh.Clear();
         ParseModel();
@@ -153,15 +161,15 @@ public class VoxelModel : MonoBehaviour {
         const float force = 200f;
         var groundCenter = transform.position;
         var origin = transform.position;
-        if (horizontalCenter) origin -= Vector3.ProjectOnPlane(size, Vector3.up) / 2;
-        else groundCenter += Vector3.ProjectOnPlane(size, Vector3.up) / 2;
-        foreach(var voxel in voxelsList) {
+        if (horizontalCenter) origin -= Vector3.ProjectOnPlane(Size, Vector3.up) / 2;
+        else groundCenter += Vector3.ProjectOnPlane(Size, Vector3.up) / 2;
+        foreach(var voxel in VoxelsList) {
             var particle = Instantiate(
                 particlePrefab,
                 origin + transform.TransformVector(voxel.pos) + Vector3.one * .5F,
                 transform.rotation
             );
-            particle.AddExplosionForce(force, groundCenter, size.magnitude);
+            particle.AddExplosionForce(force, groundCenter, Size.magnitude);
             SetMeshColor(particle.GetComponent<MeshFilter>().mesh, voxel.color);
             
             Destroy(particle.gameObject, 500);
