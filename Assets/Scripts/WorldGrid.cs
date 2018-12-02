@@ -16,8 +16,10 @@ public class WorldGrid : MonoBehaviour {
     public int treeCount;
     public Building treePrefab;
     public float minDist;
-    
-    private Vector3 zero; // origin of the grid, i.e. real-world coordinates of the leftest-bottomest cell
+
+    public List<Building> buildings;
+
+    private Vector3 zero; // origin of the grid, i.e. real-world coordinates of the left-bootom corner of the leftest-bottomest cell
 
     public static float roadFactor = 3f;
 
@@ -74,7 +76,8 @@ public class WorldGrid : MonoBehaviour {
         if (instance != null) Debug.LogError("Multiples instances of Grid");
         instance = this;
         cells = new Cell[height, width];
-        zero = Vector3.ProjectOnPlane(transform.position, Vector3.up) - scale/2 * new Vector3(width, 0, height);
+        zero = Vector3.ProjectOnPlane(transform.position, Vector3.up) - scale / 2 * new Vector3(width, 0, height);
+        buildings = new List<Building>();
     }
 
     private void PlaceTrees() {
@@ -116,7 +119,7 @@ public class WorldGrid : MonoBehaviour {
         return neighbors;
     }
 
-    public List<Vector2Int> Path(Vector2Int origin, Vector2Int target) {
+    public PathInfo[,] AStar(Vector2Int origin, Vector2Int target) {
         PathInfo[,] path = new PathInfo[height, width];
         PriorityQueue<Position> toVisit = new PriorityQueue<Position>();
         toVisit.Enqueue(new Position(origin, origin, 0, target));
@@ -140,6 +143,12 @@ public class WorldGrid : MonoBehaviour {
                 toVisit.Enqueue(d);
             }
         }
+
+        return path;
+    }
+
+    public List<Vector2Int> Path(Vector2Int origin, Vector2Int target) {
+        PathInfo[,] path = AStar(origin, target);
 
         List<Vector2Int> positions = new List<Vector2Int>();
         Vector2Int cur = target;
@@ -181,17 +190,53 @@ public class WorldGrid : MonoBehaviour {
         return true;
     }
 
+    public bool IsValid(Vector2Int p) {
+        return p.x >= 0 && p.x < width && p.y >= 0 && p.y < height;
+    }
+
+    public bool IsWalkable(Vector2Int p) {
+        return cells[p.y, p.x].isWalkable;
+    }
+
     public void AddBuilding(Building b) {
         for (int y = b.pos.y; y < b.pos.y + b.size.y; y++) {
             for (int x = b.pos.x; x < b.pos.x + b.size.x; x++) {
                 if (b is Road) {
                     cells[y, x].isRoad = true;
-                } else {
-                    cells[y, x].isWalkable = false;
                 }
 
                 cells[y, x].isBuildable = false;
+                cells[y, x].isWalkable = b.Walkable();
             }
         }
+
+        buildings.Add(b);
+    }
+
+    // Returns all buildings of type B
+    public IEnumerable<B> Buildings<B>() where B : Building {
+        foreach (Building b in buildings) {
+            if (b is B) {
+                yield return b as B;
+            }
+        }
+    }
+
+    public struct DistantB<B> where B : Building {
+        B b;
+        Vector2Int pos; // Interaction position
+    }
+
+    // Returns all buildings of type B, sorted by increasing distance from pos
+    public IEnumerable<DistantB<B>> Buildings<B>(Vector2Int pos) where B : Building {
+        List<DistantB<B>> bs = new List<DistantB<B>>;
+        foreach (B b in Buildings<B>()) {
+            List<Vector2Int> positions = b.InteractionPositions();
+            // Get best position
+
+            bs.Add(b);
+        }
+
+        bs.Sort()
     }
 }
