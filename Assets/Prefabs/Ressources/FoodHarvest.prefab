@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 4900000, guid: 72ac69fc830eba44a952093938ba57f6, type: 3}
-  horizontalCenter: 0
+  horizontalCenter: 1
   noDownFaces: 0
   colorNoise: 0.05
   particlePrefab: {fileID: 5640653648253450711, guid: fbb7f09a5b8860e49b2d5addc66f9c38,

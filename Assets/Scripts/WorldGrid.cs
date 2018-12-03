@@ -23,7 +23,7 @@ public class WorldGrid : MonoBehaviour {
     
     private Vector3 zero; // origin of the grid, i.e. real-world coordinates of the left-bootom corner of the leftest-bottomest cell
 
-    public static float roadFactor = 3f;
+    public static float roadFactor = 1.5f;
 
     public float dayDuration, nightDuration;
     private float cyclePosition;
@@ -347,8 +347,10 @@ public class WorldGrid : MonoBehaviour {
                 w.Die("died of sleep deprivation");
             }
             foreach (Worker w in sleepers) {
-                w.isSleeping = false;
-                w.gameObject.SetActive(true);
+                if (w.house != null) {
+                    w.isSleeping = false;
+                    w.gameObject.SetActive(true);
+                } else Destroy(w.gameObject);
             }
             sleepers.Clear();
         }

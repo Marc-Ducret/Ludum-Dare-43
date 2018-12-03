@@ -34,7 +34,9 @@ public class Worker : MonoBehaviour {
 
     Notifications notif;
     private Faith faith;
-    
+
+    [HideInInspector]
+    public House house;
 
     // Start is called before the first frame update
     void Start() {
@@ -344,24 +346,25 @@ public class Worker : MonoBehaviour {
 
     IEnumerable<int> EatSleep() {
         if (WorldGrid.instance.night) {
-            House h = null;
+            house = null;
             foreach (var b in FindBuilding<House>(b => b.HasRoom(), false, true)) {
                 if (b == null) {
                     yield return 0;
                 } else {
-                    h = b;
+                    house = b;
                 }
             }
 
-            h.Inhabit();
+            house.Inhabit();
             isSleeping = true;
             gameObject.SetActive(false);
             WorldGrid.instance.sleepers.Add(this);
             yield return 0;
 
             // Awake, try to eat inside the house
-            bool hasEaten = h.TryEat();
-            h.Leave();
+            bool hasEaten = house.TryEat();
+            house.Leave();
+            house = null;
             if (!hasEaten) {
                 // Go to eat outside
                 Warehouse warehouse = null;

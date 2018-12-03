@@ -11,9 +11,11 @@ public class House : Building {
     public int foodCapacity = 20;
     int foodStored = 0;
 
-    // Start is called before the first frame update
+    private Light[] lights;
+
     new void Start() {
         base.Start();
+        lights = GetComponentsInChildren<Light>();
     }
 
     public bool HasRoom() {
@@ -39,15 +41,10 @@ public class House : Building {
         foodStored++;
     }
 
-    // Update is called once per frame
     new void Update() {
         base.Update();
 
-        //string s = "";
-        //foreach (Worker w in inhabitants) {
-        //    s += " " + (w == null ? "null" : w.job.ToString()); 
-        //}
-        //Debug.Log("Inhabitants " + s);
+        foreach (var l in lights) l.enabled = peopleInside > 0;
     }
 
     public bool TryCreateWorker() {

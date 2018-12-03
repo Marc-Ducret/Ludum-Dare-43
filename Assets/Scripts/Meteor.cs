@@ -38,15 +38,19 @@ public class Meteor : MonoBehaviour {
                     radius * radius)
                     worker.Die("suffered your godly wrath");
 
-            foreach (var b in WorldGrid.instance.buildings)
+            foreach (var b in WorldGrid.instance.buildings) {
+                var broken = false;
                 for (var y = b.pos.y; y < b.pos.y + b.size.y; y++)
-                    for (var x = b.pos.x; x < b.pos.x + b.size.x; x++)
-                        if (Vector3.ProjectOnPlane(WorldGrid.instance.RealPos(new Vector2Int(x, y)) -
-                                                   transform.position, Vector3.up).sqrMagnitude < radius * radius) {
-                            faith.value += b.woodProvided * woodDestructionFaithBonus;
-                            b.GetComponent<VoxelModel>().Explode();
-                            b.size = new Vector2Int(0, 0);
-                        }
+                for (var x = b.pos.x; x < b.pos.x + b.size.x; x++)
+                    if (!broken &&
+                        Vector3.ProjectOnPlane(WorldGrid.instance.RealPos(new Vector2Int(x, y)) -
+                                               transform.position, Vector3.up).sqrMagnitude < radius * radius) {
+                        faith.value += b.woodProvided * woodDestructionFaithBonus;
+                        b.GetComponent<VoxelModel>().Explode();
+                        broken = true;
+                    }
+            }
+                
             model.Explode();
         }
     }
