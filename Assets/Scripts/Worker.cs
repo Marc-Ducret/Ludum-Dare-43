@@ -23,6 +23,7 @@ public class Worker : MonoBehaviour {
     Vector2Int target;
     List<Vector2Int> currentPath;
     int currentPathPos;
+    public House house;
 
     IEnumerator<int> actions;
 
@@ -33,6 +34,15 @@ public class Worker : MonoBehaviour {
         actions = Actions().GetEnumerator();
         currentVelocity = baseVelocity;
         animation = GetComponent<AnimateBody>();
+
+        // Find a house
+        WorldGrid.InteractableBuilding<House> house = WorldGrid.instance.NearestBuilding<House>(WorldGrid.instance.GridPos(transform.position), h => h.HasRoom());
+        if (house.b != null) {
+            this.house = house.b;
+            this.house.Inhabit(this);
+        } else {
+            Debug.Log("Couldn't find a house when instatiating worker");
+        }
     }
 
     IEnumerable<int> Actions() {
@@ -231,7 +241,7 @@ public class Worker : MonoBehaviour {
         if (target.x < 0 || target.y < 0) {
             return;
         }
-        Debug.Log("Computing path for " + this.ToString() + " to target " + target.ToString());
+        //Debug.Log("Computing path for " + this.ToString() + " to target " + target.ToString());
         Vector2Int origin = WorldGrid.instance.GridPos(transform.position);
         currentPath = WorldGrid.instance.Smooth(WorldGrid.instance.Path(origin, target));
         currentPathPos = 0;
