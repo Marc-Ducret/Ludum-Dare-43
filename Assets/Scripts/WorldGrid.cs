@@ -118,7 +118,7 @@ public class WorldGrid : MonoBehaviour {
                 Vector2Int delta = new Vector2Int(x, y);
                 Vector2Int next = pos + delta;
                 float dist = delta.magnitude;
-                if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height && dist != 0 && cells[next.y, next.x].isWalkable) {
+                if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height && dist != 0 && cells[next.y, next.x].isWalkable && cells[pos.y, next.x].isWalkable && cells[next.y, pos.x].isWalkable) {
                     yield return new Neighbor(next, dist);
                 }
             }
@@ -267,7 +267,7 @@ public class WorldGrid : MonoBehaviour {
         buildings.Add(b);
 
         foreach (Worker w in FindObjectsOfType<Worker>()) {
-            w.ComputePath();
+            w.abortMoveTo = !w.ComputePath();
         }
     }
 
@@ -283,7 +283,7 @@ public class WorldGrid : MonoBehaviour {
         buildings.Remove(b);
 
         foreach (Worker w in FindObjectsOfType<Worker>()) {
-            w.ComputePath();
+            w.abortMoveTo = !w.ComputePath();
         }
     }
 

@@ -183,6 +183,11 @@ public class Worker : MonoBehaviour {
                     gotPath = true;
                     break; // Only do the first step
                 }
+                if (abortMoveTo) {
+                    // For some reason the target became unwalkable, just choose another
+                    worker = null;
+                    break;
+                }
 
                 if (!gotPath) {
                     // There is no path to the target.
@@ -339,6 +344,11 @@ public class Worker : MonoBehaviour {
             foreach (int i in MoveTo(target.pos)) {
                 yield return null;
             }
+            if (abortMoveTo) {
+                // The building became unaccessible, wait and restart!
+                yield return null;
+                continue;
+            }
 
             // Now that we are near the building, check if the predicate is still true
             if (!pred(target.b)) {
@@ -351,23 +361,26 @@ public class Worker : MonoBehaviour {
         }
     }
 
-    public void ComputePath() {
-        if (target.x < 0 || target.y < 0) {
-            return;
+    public bool ComputePath() {
+        if (!WorldGrid.instance.IsValid(target) || !WorldGrid.instance.IsWalkable(target)) {
+            return false;
         }
         //Debug.Log("Computing path for " + this.ToString() + " to target " + target.ToString());
         Vector2Int origin = WorldGrid.instance.GridPos(transform.position);
         currentPath = WorldGrid.instance.Smooth(WorldGrid.instance.Path(origin, target));
         currentPathPos = 0;
+        return true;
     }
 
     // Actions to reach a target. If there is no path, does nothing (sets currentPath to null).
+    // Check that abortMoveTo is false afterwards!!
+    public bool abortMoveTo;
     IEnumerable<int> MoveTo(Vector2Int target) {
         this.target = target;
-        ComputePath();
+        abortMoveTo = !ComputePath();
         if (currentPath == null) yield break;
 
-        while (currentPathPos < currentPath.Count) {
+        while (!abortMoveTo && currentPathPos < currentPath.Count) {
             // Goes to next checkpoint if we reached our current objective
             Vector3 objective = WorldGrid.instance.RealPos(currentPath[currentPathPos], height);
             Vector3 curPos = transform.position;
