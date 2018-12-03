@@ -84,6 +84,8 @@ public class WorldGrid : MonoBehaviour {
                 cells[y, x].isWalkable = true;
             }
         }
+
+        ResetVisited();
     }
 
     private void PlaceTrees() {
@@ -104,7 +106,6 @@ public class WorldGrid : MonoBehaviour {
                     cells[y, x].isBuildable = false;
                     cells[y, x].isWalkable = false;
                 }
-
             }
         }
         PlaceTrees();
@@ -158,6 +159,8 @@ public class WorldGrid : MonoBehaviour {
             if (path[c.pos.y, c.pos.x].visited) {
                 continue;
             }
+
+            if (visitedOnce != null) visitedOnce[c.pos.y, c.pos.x] = true;
             path[c.pos.y, c.pos.x] = new PathInfo(c.father, c.distanceFromOrigin);
             bool done = false;
             foreach (Vector2Int target in targets)
@@ -301,15 +304,34 @@ public class WorldGrid : MonoBehaviour {
         return new InteractableBuilding<B>(buildings[i], positions[i]);
     }
 
+    private bool[,] visitedOnce;
     public bool drawWalkable;
+    public bool drawVisited;
+
+    [ContextMenu("Reset Visited")]
+    private void ResetVisited() {
+        if (visitedOnce == null) visitedOnce = new bool[height, width];
+        for (var y = 0; y < height; y++)
+        for (var x = 0; x < width; x++)
+            visitedOnce[y, x] = false;
+    }
+    
     private void OnDrawGizmos() {
         if (drawWalkable) {
-            for (var y = 0; y < height; y++) {
-                for (var x = 0; x < width; x++) {
-                    Vector3 pos = RealPos(new Vector2Int(x, y));
-                    Gizmos.color = cells[y, x].isWalkable ? Color.green : Color.red;
-                    Gizmos.DrawCube(pos, Vector3.one);
-                }
+            for (var y = 0; y < height; y++)
+            for (var x = 0; x < width; x++) {
+                Vector3 pos = RealPos(new Vector2Int(x, y));
+                Gizmos.color = cells[y, x].isWalkable ? Color.green : Color.red;
+                Gizmos.DrawCube(pos, Vector3.one);
+            }
+        }
+        
+        if (drawVisited) {
+            for (var y = 0; y < height; y++)
+            for (var x = 0; x < width; x++) {
+                Vector3 pos = RealPos(new Vector2Int(x, y));
+                Gizmos.color = visitedOnce[y, x] ? Color.green : Color.red;
+                Gizmos.DrawCube(pos, Vector3.one);
             }
         }
     }
