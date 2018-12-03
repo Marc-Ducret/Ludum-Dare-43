@@ -19,12 +19,13 @@ public class Worker : MonoBehaviour {
     public float currentVelocity;
     public float height = 0f;
 
+    public float starvingTime = 0.0001f;
+
     private AnimateBody animation;
 
     Vector2Int target;
     List<Vector2Int> currentPath;
     int currentPathPos;
-    public House house;
     public bool isSleeping;
 
     IEnumerator<int> actions;
@@ -38,17 +39,6 @@ public class Worker : MonoBehaviour {
         currentVelocity = baseVelocity;
         actions = Actions().GetEnumerator();
         animation = GetComponent<AnimateBody>();
-
-        // Find a house
-        if (house == null) {
-            WorldGrid.InteractableBuilding<House> h = WorldGrid.instance.NearestBuilding<House>(WorldGrid.instance.GridPos(transform.position), b => b.HasRoom());
-            if (h.b != null) {
-                house = h.b;
-                house.Inhabit(this);
-            } else {
-                Debug.Log("Couldn't find a house when instatiating worker");
-            }
-        }
 
         notif = FindObjectOfType<Notifications>();
         notif.Post(String.Format("A {0} joined your cult!", job));
@@ -191,7 +181,10 @@ public class Worker : MonoBehaviour {
                 int steps = 10;
                 foreach (int i in MoveTo(WorldGrid.instance.GridPos(worker.transform.position))) {
                     yield return 0;
-                    if (worker == null) break; // The worker died prematurely without our aid
+                    if (worker == null || !worker.gameObject.activeSelf) {
+                        worker = null;
+                        break;
+                    }
 
                     gotPath = true;
                     if (--steps <= 0) break;
@@ -208,7 +201,10 @@ public class Worker : MonoBehaviour {
                         // We are on the same cell, in which case we just move in direction of the target to reach its real world pos
                         DirectMoveTo(worker.transform.position);
                         yield return 0;
-                        if (worker == null) break; // The worker died prematurely without our aid
+                        if (worker == null || !worker.gameObject.activeSelf) {
+                            worker = null;
+                            break;
+                        }
                     } else {
                         // The target is unreachable, in which case we should choose another
                         worker = null;
@@ -293,16 +289,26 @@ public class Worker : MonoBehaviour {
                     yield return 0;
                 }
             }
-            isSleeping = reachedHouse;
-            gameObject.SetActive(false);
-            WorldGrid.instance.sleepers.Add(this);
-            yield return 0;
-            Debug.Log("awoken");
+            if (reachedHouse) {
+                isSleeping = true;
+                gameObject.SetActive(false);
+                WorldGrid.instance.sleepers.Add(this);
+                yield return 0;
+            } else {
+                while (true) yield return 0; // Wait to die
+            }
+            
+            
 
             // Go to eat
             Warehouse warehouse = null;
+            float morning = Time.time;
             foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Food))) {
                 if (w == null) {
+                    Debug.Log("Trying to eat " + Time.time + " " + morning + " " + starvingTime);
+                    if (Time.time - morning >= starvingTime) {
+                        Die("starved to death");
+                    }
                     yield return 0;
                 } else {
                     warehouse = w;
@@ -316,13 +322,9 @@ public class Worker : MonoBehaviour {
 
     // Actions to go to your house. If succeeded, yields a single true at the end
     IEnumerable<bool> GoToSleep() {
-        if (house == null) {
-            yield break;
-        }
-
         // Go to your house
         House h = null;
-        foreach (var b in FindBuilding<House>(b => b == house, false)) {
+        foreach (var b in FindBuilding<House>(b => b.HasRoom(), false)) {
             if (b == null) {
                 yield return false;
             } else {
@@ -398,7 +400,7 @@ public class Worker : MonoBehaviour {
                 currentPathPos++;
                 continue;
             }
-            
+
             DirectMoveTo(WorldGrid.instance.RealPos(currentPath[currentPathPos], height));
             yield return 0;
         }

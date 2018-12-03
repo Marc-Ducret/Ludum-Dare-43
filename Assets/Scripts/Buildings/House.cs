@@ -27,7 +27,6 @@ public class House : Building {
         for (int i = 0; i < population; i++) {
             if (inhabitants[i] == null) {
                 inhabitants[i] = w;
-                w.house = this;
                 return true;
             }
         }
@@ -46,5 +45,11 @@ public class House : Building {
     // Update is called once per frame
     new void Update() {
         base.Update();
+
+        //string s = "";
+        //foreach (Worker w in inhabitants) {
+        //    s += " " + (w == null ? "null" : w.job.ToString()); 
+        //}
+        //Debug.Log("Inhabitants " + s);
     }
 }

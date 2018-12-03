@@ -1,17 +1,23 @@
-Optimize A* with roads heuristic
-Prevent workers from running into each other
-Place roads by dragging
-Eating/Sleeping
-Priests: go to church to sacrifice
-Balance stuff
-Polish camera (zoom, etc)
-Height: put road down or put charcters up
-Put a beard and maybe a cap to the loggers
-Make sure you can't interact with buildings in construction
-Interaction positions of church/house
+Fixes
+- Interaction positions of church/house
+- Building buildings of size 1
+- people watch what they're doing
+- Make sure you can't interact with buildings in construction
 
-Buildings pop constructed
-Can't find house
+Gameplay
+- Priests: go to church to sacrifice
+- Balance stuff
+- Polish camera (zoom, etc)
+- Do something with trees
+- God gameplay: faith, cataclysm
 
-God gameplay: faith, cataclysm
-Music/suond?
+Could be good
+- Optimize A* with roads heuristic
+- Minimap
+
+Won't do
+- New model for warehouse?
+- Prevent workers from running into each other
+- Place roads by dragging
+- Put a beard and maybe a cap to the loggers
+- Music/sound
