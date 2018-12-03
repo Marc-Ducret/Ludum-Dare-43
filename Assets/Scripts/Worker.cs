@@ -182,7 +182,7 @@ public class Worker : MonoBehaviour {
             // TODO: what if the worker dies in the meantime?
             while ((transform.position - worker.transform.position).sqrMagnitude >= 1) {
                 bool gotPath = false;
-                int steps = 60;
+                int steps = 10;
                 foreach (int i in MoveTo(WorldGrid.instance.GridPos(worker.transform.position))) {
                     yield return 0;
                     gotPath = true;
@@ -388,11 +388,11 @@ public class Worker : MonoBehaviour {
             // Goes to next checkpoint if we reached our current objective
             Vector3 objective = WorldGrid.instance.RealPos(currentPath[currentPathPos], height);
             Vector3 curPos = transform.position;
-            if ((objective - curPos).sqrMagnitude < 1e-12) {
+            if (Vector3.ProjectOnPlane(objective - curPos, Vector3.up).sqrMagnitude < 1e-12) {
                 currentPathPos++;
                 continue;
             }
-
+            
             DirectMoveTo(WorldGrid.instance.RealPos(currentPath[currentPathPos], height));
             yield return 0;
         }
@@ -424,6 +424,6 @@ public class Worker : MonoBehaviour {
         foreach(VoxelModel model in GetComponentsInChildren<VoxelModel>()) {
             model.Explode();
         }
-        Destroy(this);
+        Destroy(gameObject);
     }
 }
