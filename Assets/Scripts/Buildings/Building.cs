@@ -13,11 +13,16 @@ public class Building : MonoBehaviour {
     public int woodProvided;
     private VoxelModel model;
 
+    private float progress;
+    private int modelDepth;
+
     public void Start() {
         pos = WorldGrid.instance.GridPos(transform.position);
 
         WorldGrid.instance.AddBuilding(this);
         model = GetComponent<VoxelModel>();
+        progress = woodRequired > 0 ? woodProvided / (float) woodRequired : 1;
+        modelDepth = (int) (model.MaxDepth() * progress);
         UpdateModel();
     }
 
@@ -56,12 +61,30 @@ public class Building : MonoBehaviour {
         return l.FindAll(p => WorldGrid.instance.IsValid(p) && WorldGrid.instance.IsWalkable(p));
     }
 
+    private void Update() {
+        if (woodRequired == 0) progress = 1;
+        else {
+            progress = Mathf.Lerp(progress, 
+                woodProvided / (float) woodRequired, 
+                Time.deltaTime / woodRequired);
+            var newDepth = (int) (model.MaxDepth() * progress);
+            if (newDepth != modelDepth) {
+                modelDepth = newDepth;
+                UpdateModel();
+            }
+        }
+    }
+
     private void OnDestroy() {
         WorldGrid.instance.RemoveBuilding(this);
     }
 
+    public bool RequireMoreWood() {
+        return woodProvided < woodRequired;
+    }
+
     public bool IsFinished() {
-        return woodProvided >= woodRequired;
+        return progress >= 1;
     }
 
     [ContextMenu("Provide Wood")]
@@ -70,11 +93,7 @@ public class Building : MonoBehaviour {
         UpdateModel();
     }
 
-    private float Progress() {
-        return woodProvided / (float) woodRequired;
-    }
-
     private void UpdateModel() {
-        model.GenerateMesh((int) (model.MaxDepth() * Progress()));
+        model.GenerateMesh(modelDepth);
     }
 }

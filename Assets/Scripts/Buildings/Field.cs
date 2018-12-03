@@ -30,32 +30,35 @@ public class Field : Building {
         }
     }
 
-    void Replant(int i) {
+    public void Replant(int i) {
         corn[i].plantTime = Time.time;
         corn[i].stage = -1; // To trigger a (re)draw, since the actual stage is 0
     }
 
     // Wether at least one corn is mature
     public bool HasCorn() {
-        return corn.Any(t => t.plantTime + matureTime <= Time.time);
+        return corn.Any(t => t.stage == t.maxStage);
     }
 
-    // Tries to harvest one corn. Returns true if it succeeded. Automatically replant.
-    public bool Harvest() {
+    // Tries to harvest one corn. Automatically replant.
+    public int Harvest() {
         for (int i = 0; i < corn.Length; i++) {
-            if (corn[i].plantTime + matureTime <= Time.time) {
-                Replant(i);
-                return true;
+            if (corn[i].stage == corn[i].maxStage) {
+                corn[i].stage++;
+                return i;
             }
         }
-        return false;
+
+        return -1;
     }
+    
+    
 
     private void Update() {
         // Recompute stages, updating models if need be
         for (int i = 0; i < corn.Length; i++) {
             int stage = (int)(corn[i].maxStage * Mathf.Min(1, (Time.time - corn[i].plantTime) / matureTime));
-            if (stage != corn[i].stage) {
+            if (stage > corn[i].stage) {
                 corn[i].stage = stage;
                 // Redraw
                 corn[i].model.GenerateMesh(stage);

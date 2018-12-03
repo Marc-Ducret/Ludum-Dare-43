@@ -12,8 +12,15 @@ public class AnimateBody : MonoBehaviour {
     public float animationSpeed;
 
     public Vector2 velocity;
-    public float acting;
+    
+    private float acting;
+    private float actDuration;
+    private int nHits;
     private bool holding;
+
+    public bool IsActing {
+        get { return acting > 0; }
+    }
 
     public Transform[] harvestPrefabs;
     
@@ -44,12 +51,11 @@ public class AnimateBody : MonoBehaviour {
         } else {
             Rotate(armLeft , 0, 45,  wave);
             
-            if (acting > 0) {
-                Rotate(armRight, -65, 115, -Mathf.Sin(.75f * 2 * Mathf.PI * (1 - acting)));
+            if (IsActing) {
+                Rotate(armRight, -65, 115, -Mathf.Sin((nHits - .25f) * 2 * Mathf.PI * (actDuration - acting) / actDuration));
                 acting = Mathf.Max(0, acting - Time.deltaTime);
             } else {
                 Rotate(armRight, -55, 15, -wave);
-
             }
         }
         
@@ -77,5 +83,11 @@ public class AnimateBody : MonoBehaviour {
             harvest = null;
         }
         holding = false;
+    }
+
+    public void Act(float duration, int hits) {
+        acting = duration;
+        actDuration = duration;
+        nHits = hits;
     }
 }
