@@ -15,14 +15,6 @@ public struct Voxel {
         this.depth = -1;
     }
 
-    public Voxel(Vector3Int pos, int color) : this(pos, new Color(
-            ((color >> 16) & 0xFF) / (float)0xFF,
-            ((color >> 8) & 0xFF) / (float)0xFF,
-            ((color >> 0) & 0xFF) / (float)0xFF
-        )) {
-
-    }
-
     public static readonly Vector3Int[] Axis = { Vector3Int.right, Vector3Int.up, new Vector3Int(0, 0, 1) };
 
     public Vector3Int TriangleVertex(int shift, int mask, bool invert) {
@@ -56,7 +48,7 @@ public class VoxelModel : MonoBehaviour {
     public Voxel[,,] Voxels { get; private set; }
     public List<Voxel> VoxelsList { get; private set; }
 
-    private float explodeDuration = 20f;
+    private float explodeDuration = 5f;
 
     private Voxel GetVoxel(Vector3Int pos) {
         if (pos.x < 0 || pos.y < 0 || pos.z < 0 || pos.x >= Size.x || pos.y >= Size.y || pos.z >= Size.z)
@@ -76,7 +68,7 @@ public class VoxelModel : MonoBehaviour {
                     int.Parse(tokens[2]),
                     int.Parse(tokens[1])
                 ),
-                int.Parse(tokens[3], NumberStyles.HexNumber)
+                RandomizeColor(int.Parse(tokens[3], NumberStyles.HexNumber))
             ));
         }
 
@@ -95,6 +87,21 @@ public class VoxelModel : MonoBehaviour {
         }
 
         ComputeDepth();
+    }
+
+    private Color RandomizeColor(int color) {
+        var noise = colorNoise + 1e-2f;
+        Func<float, float, float> colorComp = (x, n) => Mathf.Clamp(x + (Random.value - .5f) * 2 * n, 0, 1);
+        float h, s, v;
+        Color.RGBToHSV(
+            new Color(
+                ((color >> 16) & 0xFF) / (float)0xFF,
+                ((color >> 8 ) & 0xFF) / (float)0xFF,
+                ((color >> 0 ) & 0xFF) / (float)0xFF
+            ), 
+            out h, out s, out v);
+        
+        return Color.HSVToRGB(colorComp(h, noise * .1f), colorComp(s, noise), colorComp(v, noise));
     }
 
     public void GenerateMesh(int maxDepth = -1) {
@@ -118,15 +125,10 @@ public class VoxelModel : MonoBehaviour {
                     var dir = Voxel.Axis[shift] * -sign;
                     var neighbour = GetVoxel(voxel.pos + dir);
                     if ((maxDepth < 0 || neighbour.depth <= maxDepth) && neighbour.color.a > 0) continue;
-                    var noise = colorNoise + 1e-2f;
-                    Func<float, float> colorComp = x => Mathf.Clamp(x + (Random.value - .5f) * 2 * noise, 0, 1);
-                    float h, s, v;
-                    Color.RGBToHSV(voxel.color, out h, out s, out v);
-                    var vColor = Color.HSVToRGB(h, colorComp(s), colorComp(v));
-
+                    
                     for (var i = 0; i < 4; i++) {
                         normals.Add(dir);
-                        colors.Add(vColor);
+                        colors.Add(voxel.color);
                     }
 
                     var v00 = idx(voxel.TriangleVertex(shift, 0x00, sign < 0));
@@ -169,13 +171,15 @@ public class VoxelModel : MonoBehaviour {
 
     [ContextMenu("Explode")]
     public void Explode() {
-        const float force = 200f;
+        const float force = 400f;
+        const float maxPieces = 100;
         var groundCenter = transform.position;
         var origin = transform.position;
         var offset = transform.TransformVector(Vector3.ProjectOnPlane(Size, Vector3.up) / 2);
         if (horizontalCenter) origin -= offset;
         else groundCenter += offset;
         foreach (var voxel in VoxelsList) {
+            if (Random.value > maxPieces / VoxelsList.Count) continue;
             var particle = Instantiate(
                 particlePrefab,
                 origin + transform.TransformVector(voxel.pos + Vector3.one * .5F),
@@ -185,7 +189,7 @@ public class VoxelModel : MonoBehaviour {
             particle.AddExplosionForce(force, groundCenter, Size.magnitude);
             SetMeshColor(particle.GetComponent<MeshFilter>().mesh, voxel.color);
 
-            Destroy(particle.gameObject, explodeDuration);
+            Destroy(particle.gameObject, explodeDuration * (1 + Random.value));
         }
         Destroy(gameObject);
     }
