@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(VoxelModel))]
@@ -334,8 +336,22 @@ public class WorldGrid : MonoBehaviour {
         return new InteractableBuilding<B>(buildings[i], positions[i]);
     }
 
+    private void Restart() {
+        Debug.Log("Restart");
+        Scene scene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(scene.name);
+    }
+
+    private void GameOver() {
+        Time.timeScale = 0f;
+        GameObject.FindGameObjectWithTag("Finish").GetComponent<Text>().text = "Game Over\nPress R to restart";
+    }
+
     private void Update() {
         float factor = (night && FindObjectOfType<Worker>() == null ? 10f : 1);
+
+        if (Input.GetButtonDown("Restart")) Restart();
+        if (FindObjectOfType<Worker>() == null || FindObjectOfType<Building>() == null || FindObjectOfType<Faith>().value <= 0) { GameOver(); }
 
         cyclePosition = Mathf.Repeat(cyclePosition + factor * Time.deltaTime, dayDuration + nightDuration);
         const float transition = 5f;

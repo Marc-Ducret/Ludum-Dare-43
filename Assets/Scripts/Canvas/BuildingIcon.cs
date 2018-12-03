@@ -18,13 +18,4 @@ public class BuildingIcon : MonoBehaviour {
     private void TaskOnClick() {
         buildingSelector.UpdateSelection(this);
     }
-
-    private void OnMouseOver() {
-        Debug.Log("Mousing over");
-        text.text = message;
-    }
-
-    private void OnMouseExit() {
-        text.text = "";
-    }
 }
