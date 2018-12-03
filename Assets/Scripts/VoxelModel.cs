@@ -90,7 +90,7 @@ public class VoxelModel : MonoBehaviour {
     }
 
     private Color RandomizeColor(int color) {
-        var noise = colorNoise + 1e-2f;
+        var noise = colorNoise + 3e-2f;
         Func<float, float, float> colorComp = (x, n) => Mathf.Clamp(x + (Random.value - .5f) * 2 * n, 0, 1);
         float h, s, v;
         Color.RGBToHSV(

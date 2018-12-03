@@ -13,6 +13,13 @@ public class CameraMovement : MonoBehaviour {
 
     private Vector3 velocity;
     private float angularVelocity;
+    private float zoom;
+
+    private Camera cam;
+
+    private void Start() {
+        cam = GetComponentInChildren<Camera>();
+    }
 
     private void Update() {
         if (useMouse) {
@@ -28,13 +35,21 @@ public class CameraMovement : MonoBehaviour {
         
         Move(Input.GetAxis("Horizontal") * transform.right);
         Move(Input.GetAxis("Vertical") * transform.forward);
-        angularVelocity += Input.GetAxis("Rotate") * Time.deltaTime * rotAcceleration;
+        angularVelocity += Input.GetAxis("Rotate") * Time.unscaledDeltaTime * rotAcceleration;
+        zoom += Input.GetAxis("Mouse ScrollWheel");
+        zoom = Mathf.Clamp(zoom, 0, .9f);
         
-        transform.position = Vector3.SmoothDamp(transform.position, transform.position, ref velocity, smooth);
+        transform.position = Vector3.SmoothDamp(transform.position, transform.position, ref velocity, smooth, 100,
+            Time.unscaledDeltaTime);
         var rotation = transform.rotation.eulerAngles;
-        rotation.y = rotation.y + angularVelocity * Time.deltaTime;
-        angularVelocity -= 10 / smooth * Time.deltaTime * angularVelocity;
+        rotation.y = rotation.y + angularVelocity * Time.unscaledDeltaTime;
+        angularVelocity -= 10 / smooth * Time.unscaledDeltaTime * angularVelocity;
         transform.rotation = Quaternion.Euler(rotation);
+
+        cam.transform.localPosition = Vector3.up *
+                                 Mathf.Lerp(cam.transform.localPosition.y, (1 - zoom) * 35, Time.unscaledDeltaTime * 5 / smooth);
+        cam.transform.localEulerAngles = Vector3.right *
+                                    Mathf.Lerp(cam.transform.localEulerAngles.x, (1 - zoom) * 45, Time.unscaledDeltaTime * 5 / smooth);
     }
 
     private void Move(Vector3 direction) {
