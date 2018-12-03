@@ -37,7 +37,7 @@ public class Field : Building {
 
     // Wether at least one corn is mature
     public bool HasCorn() {
-        return corn.Any(t => t.stage == t.maxStage);
+        return IsFinished() && corn.Any(t => t.stage == t.maxStage);
     }
 
     // Tries to harvest one corn. Automatically replant.

@@ -2,7 +2,8 @@ Fixes
 - Interaction positions of church/house
 - Building buildings of size 1
 - people watch what they're doing
-- Make sure you can't interact with buildings in construction
+- Buildings wlick on banner build things
+- Meteorite water
 
 Gameplay
 - Priests: go to church to sacrifice

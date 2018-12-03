@@ -17,6 +17,7 @@ public class House : Building {
     }
 
     public bool HasRoom() {
+        if (!IsFinished()) return false;
         foreach (Worker w in inhabitants) {
             if (w == null) return true;
         }

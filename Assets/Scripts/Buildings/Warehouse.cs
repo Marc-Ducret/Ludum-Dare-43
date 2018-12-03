@@ -24,7 +24,7 @@ public class Warehouse : Building {
                 }
             }
         }
-        return false; 
+        return false;
     }
 
     public bool RemoveElement(Resource elemType) {
@@ -37,7 +37,7 @@ public class Warehouse : Building {
                 } 
             }
         }
-        return false; 
+        return false;
     }
     
     private bool IsEmpty() {
@@ -55,7 +55,7 @@ public class Warehouse : Building {
     }
 
     public bool Has(Resource elemType) {
-        return !IsEmpty() && elementType == elemType;
+        return IsFinished() && !IsEmpty() && elementType == elemType;
     }
 
     public bool CanStore(Resource elemType) {
