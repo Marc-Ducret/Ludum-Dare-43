@@ -316,12 +316,12 @@ public class WorldGrid : MonoBehaviour {
     }
 
     // Returns position of nearest building of type B with predicate being true
-    public InteractableBuilding<B> NearestBuilding<B>(Vector2Int pos, Func<B, bool> pred) where B : Building {
+    public InteractableBuilding<B> NearestBuilding<B>(Vector2Int pos, Func<B, bool> pred, bool onlyFront = false) where B : Building {
         List<Vector2Int> positions = new List<Vector2Int>();
         List<B> buildings = new List<B>();
         foreach (B b in Buildings<B>()) {
             if (pred(b))
-                foreach (Vector2Int p in b.InteractionPositions()) {
+                foreach (Vector2Int p in b.InteractionPositions(onlyFront)) {
                     positions.Add(p);
                     buildings.Add(b);
                 }

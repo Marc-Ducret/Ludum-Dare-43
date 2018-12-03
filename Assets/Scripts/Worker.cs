@@ -278,7 +278,7 @@ public class Worker : MonoBehaviour {
 
         // Go to the temple
         Temple temple = null;
-        foreach (var t in FindBuilding<Temple>(t => t.CanSacrifice())) {
+        foreach (var t in FindBuilding<Temple>(t => t.CanSacrifice(), false, true)) {
             if (t == null) {
                 yield return 0;
             } else {
@@ -305,7 +305,7 @@ public class Worker : MonoBehaviour {
         animation.Hold(Resource.Food);
 
         House h = null;
-        foreach (var b in FindBuilding<House>(b => b.CanStoreFood())) {
+        foreach (var b in FindBuilding<House>(b => b.CanStoreFood(), true, true)) {
             if (b == null) {
                 yield return 0;
             } else {
@@ -324,7 +324,7 @@ public class Worker : MonoBehaviour {
     IEnumerable<int> EatSleep() {
         if (WorldGrid.instance.night) {
             House h = null;
-            foreach (var b in FindBuilding<House>(b => b.HasRoom(), false)) {
+            foreach (var b in FindBuilding<House>(b => b.HasRoom(), false, true)) {
                 if (b == null) {
                     yield return 0;
                 } else {
@@ -364,14 +364,14 @@ public class Worker : MonoBehaviour {
     }
 
     // Yields action to go to a building with the required predicate. Returns null until the last step, which is the found building.
-    IEnumerable<B> FindBuilding<B>(Func<B, bool> pred, bool overrideEatSleep = true) where B : Building {
+    IEnumerable<B> FindBuilding<B>(Func<B, bool> pred, bool overrideEatSleep = true, bool onlyFront = false) where B : Building {
         while (true) {
             if (overrideEatSleep)
                 foreach (int i in EatSleep()) {
                     yield return null;
                 }
 
-            WorldGrid.InteractableBuilding<B> target = WorldGrid.instance.NearestBuilding(WorldGrid.instance.GridPos(transform.position), pred);
+            WorldGrid.InteractableBuilding<B> target = WorldGrid.instance.NearestBuilding(WorldGrid.instance.GridPos(transform.position), pred, onlyFront);
             if (target.b == null) {
                 // No building could be found, wait and restart!
                 yield return null;

@@ -40,7 +40,7 @@ public class Building : MonoBehaviour {
     // OXXO
     //  OO
     // For walkable buildings, this is any position inside the building
-    public List<Vector2Int> InteractionPositions() {
+    public List<Vector2Int> InteractionPositions(bool onlyFront = false) {
         List<Vector2Int> l = new List<Vector2Int>();
 
         if (isWalkable) {
@@ -49,6 +49,12 @@ public class Building : MonoBehaviour {
                     l.Add(new Vector2Int(x, y));
                 }
             }
+            return l;
+        }
+
+        if (onlyFront) {
+            // This is really hacky, but I don't care.
+            l.Add(new Vector2Int(pos.x + 1, pos.y - 1));
             return l;
         }
 

@@ -1,5 +1,4 @@
 Fixes
-- Interaction positions of church/house
 - Building buildings of size 1
 - people watch what they're doing
 - Buildings wlick on banner build things
