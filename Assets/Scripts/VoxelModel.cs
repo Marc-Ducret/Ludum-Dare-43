@@ -217,6 +217,10 @@ public class VoxelModel : MonoBehaviour {
             }
         }
 
+        foreach (var v in VoxelsList)
+            if(Voxels[v.pos.x, v.pos.y, v.pos.z].depth < 0)
+                visited.Add(v);
+
         VoxelsList = visited;
     }
 
