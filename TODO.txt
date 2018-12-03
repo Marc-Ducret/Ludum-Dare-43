@@ -1,9 +1,13 @@
-Fix placement of resources in warehouse
 Optimize A* with roads heuristic
+Prevent workers from running into each other
 Place roads by dragging
 Night
 Eating/Sleeping
 Breeders
-Builders
+Priests: go to church to sacrifice
+Explication (notifications) when somebody dies
+Balance stuff
+Polish camera (zoom, etc)
+Height: put road down or put charcters up
 
 God gameplay: faith, cataclysm

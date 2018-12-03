@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 // TODOs:
 // - recompute paths when a new building is created/destroyed
@@ -43,8 +44,7 @@ public class Worker : MonoBehaviour {
                     foreach (Field f in FindBuilding<Field>(f => f.HasCorn())) {
                         if (f == null) {
                             yield return 0;
-                        }
-                        else {
+                        } else {
                             field = f;
                         }
                     }
@@ -75,8 +75,7 @@ public class Worker : MonoBehaviour {
                     foreach (Tree t in FindBuilding<Tree>(t => true)) {
                         if (t == null) {
                             yield return 0;
-                        }
-                        else {
+                        } else {
                             tree = t;
                         }
                     }
@@ -100,7 +99,7 @@ public class Worker : MonoBehaviour {
                     animation.Drop();
                     yield return 0;
                 }
-                
+
             case Job.Builder:
                 while (true) {
                     Warehouse warehouse = null;
@@ -111,10 +110,10 @@ public class Worker : MonoBehaviour {
                             warehouse = w;
                         }
                     }
-                    
+
                     Debug.Assert(warehouse.RemoveElement(Resource.Wood), "Retrieve failed");
                     animation.Hold(Resource.Wood);
-                    
+
                     Building building = null;
                     foreach (var b in FindBuilding<Building>(b => !b.IsFinished())) {
                         if (b == null) {
@@ -129,6 +128,75 @@ public class Worker : MonoBehaviour {
                     while (animation.acting > 0) yield return 0;
                     building.ProvideWood();
                     yield return 0;
+                }
+
+            case Job.Priest:
+                while (true) {
+                    Worker worker = null;
+                    while (worker == null) {
+                        Worker[] workers = FindObjectsOfType<Worker>();
+                        if (workers.Length == 1) {
+                            // The only worker is ourself!
+                            yield return 0;
+                            continue;
+                        }
+
+                        // Sample one random worker
+                        worker = this;
+                        while (worker == this) {
+                            // <= 2 iterations in expectation
+                            worker = workers[Random.Range(0, workers.Length)];
+                        }
+
+                        // Now try to catch him
+                        // TODO: what if the worker dies in the meantime?
+                        while ((transform.position - worker.transform.position).sqrMagnitude >= 1) {
+                            bool gotPath = false;
+                            foreach (int i in MoveTo(WorldGrid.instance.GridPos(worker.transform.position))) {
+                                yield return 0;
+                                gotPath = true;
+                                break; // Only do the first step
+                            }
+
+                            if (!gotPath) {
+                                // There is no path to the target.
+                                if (WorldGrid.instance.GridPos(worker.transform.position) == WorldGrid.instance.GridPos(transform.position)) {
+                                    // We are on the same cell, in which case we just move in direction of the target to reach its real world pos
+                                    DirectMoveTo(worker.transform.position);
+                                    yield return 0;
+                                } else {
+                                    // The target is unreachable, in which case we should choose another
+                                    worker = null;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // TEMP: KILL HIM
+                    Debug.Log("GOT");
+                    //Destroy(target);
+                    yield return 0;
+
+                    // Go to the church
+
+                    //Debug.Assert(warehouse.RemoveElement(Resource.Wood), "Retrieve failed");
+                    //animation.Hold(Resource.Wood);
+
+                    //Building building = null;
+                    //foreach (var b in FindBuilding<Building>(b => !b.IsFinished())) {
+                    //    if (b == null) {
+                    //        yield return 0;
+                    //    } else {
+                    //        building = b;
+                    //    }
+                    //}
+
+                    //animation.Drop();
+                    //animation.acting = 1;
+                    //while (animation.acting > 0) yield return 0;
+                    //building.ProvideWood();
+                    //yield return 0;
                 }
         }
     }
@@ -163,6 +231,7 @@ public class Worker : MonoBehaviour {
         if (target.x < 0 || target.y < 0) {
             return;
         }
+        Debug.Log("Computing path for " + this.ToString() + " to target " + target.ToString());
         Vector2Int origin = WorldGrid.instance.GridPos(transform.position);
         currentPath = WorldGrid.instance.Smooth(WorldGrid.instance.Path(origin, target));
         currentPathPos = 0;
@@ -183,21 +252,26 @@ public class Worker : MonoBehaviour {
                 continue;
             }
 
-            // Update velocity
-            Vector2Int pos = WorldGrid.instance.GridPos(transform.position);
-            currentVelocity = baseVelocity * (WorldGrid.instance.cells[pos.y, pos.x].isRoad ? WorldGrid.roadFactor : 1f);
-
-            // Move to objective
-            Vector3 delta = WorldGrid.instance.RealPos(currentPath[currentPathPos], height) - transform.position;
-            delta = delta * Mathf.Min(1, currentVelocity * Time.deltaTime / delta.magnitude);
-            transform.position += delta;
-            animation.velocity.x = delta.x / Time.deltaTime;
-            animation.velocity.y = delta.z / Time.deltaTime;
+            DirectMoveTo(WorldGrid.instance.RealPos(currentPath[currentPathPos], height));
             yield return 0;
         }
 
         animation.velocity = Vector3.zero;
         this.target = new Vector2Int(-1, -1);
+    }
+
+    // Directly updates the transform in direction of the target
+    void DirectMoveTo(Vector3 target) {
+        // Update velocity
+        Vector2Int pos = WorldGrid.instance.GridPos(transform.position);
+        currentVelocity = baseVelocity * (WorldGrid.instance.cells[pos.y, pos.x].isRoad ? WorldGrid.roadFactor : 1f);
+
+        // Move to objective
+        Vector3 delta = target - transform.position;
+        delta = delta * Mathf.Min(1, currentVelocity * Time.deltaTime / delta.magnitude);
+        transform.position += delta;
+        animation.velocity.x = delta.x / Time.deltaTime;
+        animation.velocity.y = delta.z / Time.deltaTime;
     }
 
     // Update is called once per frame
