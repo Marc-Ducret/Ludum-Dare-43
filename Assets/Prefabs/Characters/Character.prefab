@@ -48,9 +48,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   job: 2
   baseVelocity: 10
-  currentVelocity: 0
+  numDaysBeforeDouble: 2
   height: 0
   starvingTime: 20
+  faithSlowDown: 3
+  plantingTime: 2
+  choppingTime: 4
+  buildingTime: 5
+  hexingTime: 3
+  sacrificingTime: 10
+  breedingTime: 1
   isSleeping: 0
   house: {fileID: 0}
   abortMoveTo: 0
