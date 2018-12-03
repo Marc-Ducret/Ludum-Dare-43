@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(VoxelModel))]
@@ -17,12 +18,17 @@ public class WorldGrid : MonoBehaviour {
     public int treeCount;
     public Building treePrefab;
     public float minDist;
-
+    
     public List<Building> buildings;
-
+    
     private Vector3 zero; // origin of the grid, i.e. real-world coordinates of the left-bootom corner of the leftest-bottomest cell
 
     public static float roadFactor = 3f;
+
+    public float dayDuration, nightDuration;
+    private float cyclePosition;
+    public Light sun;
+    public bool night;
 
     public struct Cell {
         public bool isWalkable;
@@ -322,6 +328,21 @@ public class WorldGrid : MonoBehaviour {
             return new InteractableBuilding<B>(null, Vector2Int.zero);
         }
         return new InteractableBuilding<B>(buildings[i], positions[i]);
+    }
+
+    private void Update() {
+        cyclePosition = Mathf.Repeat(Time.time, dayDuration + nightDuration);
+        const float transition = 5f;
+        var fade = Mathf.Clamp(dayDuration / 2 - Mathf.Abs(cyclePosition - dayDuration / 2), 0, transition) / transition;
+        sun.intensity = fade * 5 + 1e-2f;
+        var sunCycle = cyclePosition < dayDuration
+            ? cyclePosition / dayDuration * 180
+            : 180 + (cyclePosition - dayDuration) / nightDuration * 180;
+        sun.transform.rotation = Quaternion.Euler(sunCycle, 130, 0);
+        if (night && cyclePosition < dayDuration) {
+            //TODO kill non sleeping workers
+        }
+        night = cyclePosition > dayDuration;
     }
 
     private bool[,] visitedOnce;
