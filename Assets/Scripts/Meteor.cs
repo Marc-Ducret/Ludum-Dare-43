@@ -11,6 +11,8 @@ public class Meteor : MonoBehaviour {
     public float noise;
     public float fallDelay;
     public float radius;
+
+    public float woodDestructionFaithBonus;
     
     private VoxelModel model;
     
@@ -29,6 +31,7 @@ public class Meteor : MonoBehaviour {
 
     private void Update() {
         transform.position += velocity * Time.deltaTime;
+        var faith = FindObjectOfType<Faith>();
         if (transform.position.y < .1f) {
             foreach(var worker in FindObjectsOfType<Worker>())
                 if (Vector3.ProjectOnPlane(worker.transform.position - transform.position, Vector3.up).sqrMagnitude <
@@ -40,6 +43,7 @@ public class Meteor : MonoBehaviour {
                     for (var x = b.pos.x; x < b.pos.x + b.size.x; x++)
                         if (Vector3.ProjectOnPlane(WorldGrid.instance.RealPos(new Vector2Int(x, y)) -
                                                    transform.position, Vector3.up).sqrMagnitude < radius * radius) {
+                            faith.value += b.woodProvided * woodDestructionFaithBonus;
                             b.GetComponent<VoxelModel>().Explode();
                             b.size = new Vector2Int(0, 0);
                         }

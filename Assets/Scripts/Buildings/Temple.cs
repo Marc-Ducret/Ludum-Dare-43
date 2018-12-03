@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Temple : Building {
-    bool hasSacrifice = false;
-
-    // Start is called before the first frame update
+    
+    bool hasSacrifice;
+    public float faithBonus;
+    
     new void Start() {
         base.Start();
     }
@@ -22,8 +23,12 @@ public class Temple : Building {
         hasSacrifice = false;
     }
 
-    // Update is called once per frame
     new void Update() {
         base.Update();
+
+        if (faithBonus > 0 && IsFinished()) {
+            FindObjectOfType<Faith>().value += faithBonus;
+            faithBonus = 0;
+        }
     }
 }
