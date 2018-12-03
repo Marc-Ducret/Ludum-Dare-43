@@ -121,7 +121,9 @@ MonoBehaviour:
   woodRequired: 1
   woodProvided: 0
   toDisableAsGhost: []
-  matureTime: 8
+  buildingTime: 0
+  isBeingConstructed: 0
+  matureTime: 16
 --- !u!1001 &828519328729718655
 PrefabInstance:
   m_ObjectHideFlags: 0
