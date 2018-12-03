@@ -21,7 +21,8 @@ public class Worker : MonoBehaviour {
     public float currentVelocity;
     public float height = 0f;
 
-    public float starvingTime = 0.0001f;
+    public float starvingTime = 20f;
+    public float faithSlowDown = 3f;
 
     private AnimateBody animation;
 
@@ -464,7 +465,7 @@ public class Worker : MonoBehaviour {
         // Update velocity
         Vector2Int pos = WorldGrid.instance.GridPos(transform.position);
         currentVelocity = baseVelocity * (WorldGrid.instance.cells[pos.y, pos.x].isRoad ? WorldGrid.roadFactor : 1f);
-        currentVelocity *= faith.value;
+        currentVelocity *= 1f/Mathf.Lerp(1, faithSlowDown, 1 - faith.value);
 
         // Move to objective
         Vector3 delta = Vector3.ProjectOnPlane(target - transform.position, Vector3.up);
