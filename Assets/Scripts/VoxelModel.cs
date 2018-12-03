@@ -118,7 +118,8 @@ public class VoxelModel : MonoBehaviour {
                     var dir = Voxel.Axis[shift] * -sign;
                     var neighbour = GetVoxel(voxel.pos + dir);
                     if ((maxDepth < 0 || neighbour.depth <= maxDepth) && neighbour.color.a > 0) continue;
-                    Func<float, float> colorComp = x => Mathf.Clamp(x + (Random.value - .5f) * 2 * colorNoise, 0, 1);
+                    var noise = colorNoise + 1e-2f;
+                    Func<float, float> colorComp = x => Mathf.Clamp(x + (Random.value - .5f) * 2 * noise, 0, 1);
                     float h, s, v;
                     Color.RGBToHSV(voxel.color, out h, out s, out v);
                     var vColor = Color.HSVToRGB(h, colorComp(s), colorComp(v));
