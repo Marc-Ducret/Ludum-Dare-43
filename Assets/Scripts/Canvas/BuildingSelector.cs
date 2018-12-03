@@ -34,7 +34,7 @@ public class BuildingSelector : MonoBehaviour {
             var gridPos = grid.GridPos(hit.point - grid.RealVec(selected.buildingPrefab.size) / 2);
             var snapPosition = grid.RealPos(gridPos, 0, false);
             ghost.transform.position = snapPosition;
-            var canPlace = grid.CanPlaceAt(gridPos, selected.buildingPrefab.size);
+            var canPlace = grid.CanPlaceAt(gridPos, selected.buildingPrefab.size, selected.buildingPrefab.Walkable());
             ghostMaterial.color = canPlace ? Color.green : Color.red;
             
             if (Input.GetMouseButtonDown(0) && canPlace) {

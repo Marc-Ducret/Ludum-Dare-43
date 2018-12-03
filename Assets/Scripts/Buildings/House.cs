@@ -5,7 +5,10 @@ using UnityEngine;
 public class House : Building {
     public int population = 4;
     int peopleInside = 0;
-    public Worker[] workerPrefabs;
+    public Worker builder, breeder, priest, farmer, logger;
+    Worker[] workerPrefabs;
+    public int numBuilders, numBreeders, numPriests, numFarmers, numLoggers;
+    float[] targetRepartition;
 
     public int foodCost = 5;
     public int foodCapacity = 20;
@@ -14,6 +17,21 @@ public class House : Building {
     // Start is called before the first frame update
     new void Start() {
         base.Start();
+
+        workerPrefabs = new Worker[5];
+        workerPrefabs[(int)Worker.Job.Builder] = builder;
+        workerPrefabs[(int)Worker.Job.Breeder] = breeder;
+        workerPrefabs[(int)Worker.Job.Priest] = priest;
+        workerPrefabs[(int)Worker.Job.Farmer] = farmer;
+        workerPrefabs[(int)Worker.Job.Logger] = logger;
+
+        float sum = numBuilders + numBreeders + numPriests + numFarmers + numLoggers;
+        targetRepartition = new float[5];
+        targetRepartition[(int)Worker.Job.Builder] = numBuilders / sum;
+        targetRepartition[(int)Worker.Job.Breeder] = numBreeders / sum;
+        targetRepartition[(int)Worker.Job.Priest] = numPriests / sum;
+        targetRepartition[(int)Worker.Job.Farmer] = numFarmers / sum;
+        targetRepartition[(int)Worker.Job.Logger] = numLoggers / sum;
     }
 
     public bool HasRoom() {
@@ -55,7 +73,24 @@ public class House : Building {
         List<Vector2Int> pos = InteractionPositions();
         if (pos.Count == 0) return false;
 
-        Worker w = Instantiate(workerPrefabs[Random.Range(0, workerPrefabs.Length)]);
+        int[] workers = new int[5];
+        int numWorkers = 0;
+        foreach (Worker wk in FindObjectsOfType<Worker>()) {
+            workers[(int)wk.job]++;
+            numWorkers++;
+        }
+
+        float maxGap = 0;
+        int bestJob = 0;
+        for (int job = 0; job < 5; job++) {
+            float gap = targetRepartition[job] - workers[job] / (float)numWorkers;
+            if (gap > maxGap) {
+                maxGap = gap;
+                bestJob = job;
+            }
+        }
+
+        Worker w = Instantiate(workerPrefabs[bestJob]);
         w.transform.position = WorldGrid.instance.RealPos(pos[Random.Range(0, pos.Count - 1)]);
         Debug.Log("Created " + w.ToString() + " at " + w.transform.position.ToString());
         foodStored -= foodCost;

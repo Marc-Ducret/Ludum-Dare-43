@@ -414,12 +414,16 @@ MonoBehaviour:
   woodProvided: 0
   toDisableAsGhost: []
   population: 5
-  workerPrefabs:
-  - {fileID: 7014191147872456226, guid: c3370da45a648e149b27d45a86629447, type: 3}
-  - {fileID: 8292785443639349832, guid: 0746a77e09f22f54e91f6298cf001e92, type: 3}
-  - {fileID: 8225355981523129904, guid: ea873a73d470fe94eb0edd3ca0860af3, type: 3}
-  - {fileID: 5384124188848056072, guid: 20a67690863a17a4d9ce5ca4db7d22d0, type: 3}
-  - {fileID: 7401040462941301198, guid: fe1961c535f216d40ae30c9690f87719, type: 3}
+  builder: {fileID: 8292785443639349832, guid: 0746a77e09f22f54e91f6298cf001e92, type: 3}
+  breeder: {fileID: 7014191147872456226, guid: c3370da45a648e149b27d45a86629447, type: 3}
+  priest: {fileID: 7401040462941301198, guid: fe1961c535f216d40ae30c9690f87719, type: 3}
+  farmer: {fileID: 8225355981523129904, guid: ea873a73d470fe94eb0edd3ca0860af3, type: 3}
+  logger: {fileID: 5384124188848056072, guid: 20a67690863a17a4d9ce5ca4db7d22d0, type: 3}
+  numBuilders: 2
+  numBreeders: 2
+  numPriests: 1
+  numFarmers: 4
+  numLoggers: 3
   foodCost: 5
   foodCapacity: 20
 --- !u!1 &6299273770700642849

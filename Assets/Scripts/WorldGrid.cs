@@ -235,16 +235,17 @@ public class WorldGrid : MonoBehaviour {
         return new Vector3(vec.x, height / scale, vec.y) * scale;
     }
 
-    public bool CanPlaceAt(Vector2Int pos, Vector2Int size) {
+    public bool CanPlaceAt(Vector2Int pos, Vector2Int size, bool isWalkable) {
         for (var y = pos.y; y < pos.y + size.y; y++) {
             for (var x = pos.x; x < pos.x + size.x; x++) {
                 Vector2Int p = new Vector2Int(x, y);
                 if (!IsValid(p)) return false;
                 if (!cells[y, x].isBuildable) return false;
-                foreach (Worker w in FindObjectsOfType<Worker>()) {
-                    if (GridPos(w.transform.position) == p) {
-                        return false;
-                    }
+                if (!isWalkable)
+                    foreach (Worker w in FindObjectsOfType<Worker>()) {
+                        if (GridPos(w.transform.position) == p) {
+                            return false;
+                        }
                 }
             }
         }
