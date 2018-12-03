@@ -225,7 +225,14 @@ public class WorldGrid : MonoBehaviour {
     public bool CanPlaceAt(Vector2Int pos, Vector2Int size) {
         for (var y = pos.y; y < pos.y + size.y; y++) {
             for (var x = pos.x; x < pos.x + size.x; x++) {
-                if (x < 0 || y < 0 || x >= width || y >= height || !cells[y, x].isBuildable) return false;
+                Vector2Int p = new Vector2Int(x, y);
+                if (!IsValid(p)) return false;
+                if (!cells[y, x].isBuildable) return false;
+                foreach (Worker w in FindObjectsOfType<Worker>()) {
+                    if (GridPos(w.transform.position) == p) {
+                        return false;
+                    }
+                }
             }
         }
 
