@@ -29,6 +29,7 @@ public class WorldGrid : MonoBehaviour {
     private float cyclePosition;
     public Light sun;
     public bool night;
+    public List<Worker> sleepers;
 
     public struct Cell {
         public bool isWalkable;
@@ -260,7 +261,7 @@ public class WorldGrid : MonoBehaviour {
     }
 
     public void AddBuilding(Building b) {
-        Debug.Log("Adding building of type " + b.ToString() + " at pos " + b.pos.ToString());
+        //Debug.Log("Adding building of type " + b.ToString() + " at pos " + b.pos.ToString());
         for (int y = b.pos.y; y < b.pos.y + b.size.y; y++) {
             for (int x = b.pos.x; x < b.pos.x + b.size.x; x++) {
                 if (b is Road) {
@@ -342,7 +343,14 @@ public class WorldGrid : MonoBehaviour {
             : 180 + (cyclePosition - dayDuration) / nightDuration * 180;
         sun.transform.rotation = Quaternion.Euler(sunCycle, 130, 0);
         if (night && cyclePosition < dayDuration) {
-            //TODO kill non sleeping workers
+            foreach (Worker w in FindObjectsOfType<Worker>()) {
+                w.Die("died of sleep deprivation");
+            }
+            foreach (Worker w in sleepers) {
+                w.isSleeping = false;
+                w.gameObject.SetActive(true);
+            }
+            sleepers.Clear();
         }
         night = cyclePosition > dayDuration;
     }

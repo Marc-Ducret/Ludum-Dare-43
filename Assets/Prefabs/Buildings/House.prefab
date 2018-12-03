@@ -412,7 +412,8 @@ MonoBehaviour:
   isWalkable: 0
   woodRequired: 1
   woodProvided: 0
-  population: 4
+  population: 5
+  foodRequired: 3
 --- !u!1 &6299273770700642849
 GameObject:
   m_ObjectHideFlags: 0

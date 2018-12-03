@@ -25,6 +25,7 @@ public class Worker : MonoBehaviour {
     List<Vector2Int> currentPath;
     int currentPathPos;
     public House house;
+    public bool isSleeping;
 
     IEnumerator<int> actions;
 
@@ -210,8 +211,7 @@ public class Worker : MonoBehaviour {
         }
 
         // TEMP: KILL HIM
-        notif.Post("Your Priest sacrificed your " + worker.ToString());
-        worker.Die();
+        worker.Die("was sacrificed by your Priest");
         yield return 0;
 
         // Go to the church
@@ -275,13 +275,7 @@ public class Worker : MonoBehaviour {
     }
 
     IEnumerable<int> EatSleep() {
-        bool isNight = false;
-        bool isTooLate = false;
-        bool hungry = false;
-
-        if (isTooLate) {
-            Debug.Log("Too late to sleep!");
-        } else if (isNight) {
+        if (WorldGrid.instance.night) {
             bool reachedHouse = false;
             foreach (bool b in GoToSleep()) {
                 if (b) {
@@ -290,10 +284,13 @@ public class Worker : MonoBehaviour {
                     yield return 0;
                 }
             }
-            if (!reachedHouse) {
-                Debug.Log("Couldn't reach house!");
-            }
-        } else if (hungry) {
+            isSleeping = reachedHouse;
+            gameObject.SetActive(false);
+            WorldGrid.instance.sleepers.Add(this);
+            yield return 0;
+            Debug.Log("awoken");
+
+            // Go to eat
             Warehouse warehouse = null;
             foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Food))) {
                 if (w == null) {
@@ -420,8 +417,9 @@ public class Worker : MonoBehaviour {
         actions.MoveNext();
     }
 
-    void Die() {
-        foreach(VoxelModel model in GetComponentsInChildren<VoxelModel>()) {
+    public void Die(string message) {
+        notif.Post(string.Format("Your {0} {1}", job.ToString(), message));
+        foreach (VoxelModel model in GetComponentsInChildren<VoxelModel>()) {
             model.Explode();
         }
         Destroy(gameObject);
