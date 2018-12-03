@@ -1,0 +1,7 @@
+# Goxel 0.8.0
+# One line per voxel
+# X Y Z RRGGBB
+3 -5 6 afc6f3
+3 -4 6 eec39a
+3 -3 6 eec39a
+3 -2 6 eec39a

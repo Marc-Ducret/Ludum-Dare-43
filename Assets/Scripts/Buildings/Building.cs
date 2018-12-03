@@ -64,9 +64,9 @@ public class Building : MonoBehaviour {
     private void Update() {
         if (woodRequired == 0) progress = 1;
         else {
-            progress = Mathf.Lerp(progress, 
-                woodProvided / (float) woodRequired, 
-                Time.deltaTime / woodRequired);
+            progress = Mathf.Min(
+                progress + Time.deltaTime / woodRequired * .2f,
+                woodProvided / (float) woodRequired);
             var newDepth = (int) (model.MaxDepth() * progress);
             if (newDepth != modelDepth) {
                 modelDepth = newDepth;
@@ -84,7 +84,7 @@ public class Building : MonoBehaviour {
     }
 
     public bool IsFinished() {
-        return progress >= 1;
+        return modelDepth >= model.MaxDepth();
     }
 
     [ContextMenu("Provide Wood")]
