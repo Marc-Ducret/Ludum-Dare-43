@@ -19,17 +19,16 @@ public class Worker : MonoBehaviour {
 
     private AnimateBody animation;
 
+    Vector2Int target;
     List<Vector2Int> currentPath;
     int currentPathPos;
-
-    public Vector2Int target;
 
     IEnumerator<int> actions;
 
     // Start is called before the first frame update
     void Start() {
         currentPath = new List<Vector2Int>();
-        target = WorldGrid.instance.GridPos(transform.position);
+        target = new Vector2Int(-1, -1); ;
         actions = Actions().GetEnumerator();
         currentVelocity = baseVelocity;
         animation = GetComponent<AnimateBody>();
@@ -133,12 +132,19 @@ public class Worker : MonoBehaviour {
         }
     }
 
-    // Actions to reach a target. If there is no path, does nothing (sets currentPath to null).
-    IEnumerable<int> MoveTo(Vector2Int target) {
+    public void ComputePath() {
+        if (target.x < 0 || target.y < 0) {
+            return;
+        }
         Vector2Int origin = WorldGrid.instance.GridPos(transform.position);
         currentPath = WorldGrid.instance.Smooth(WorldGrid.instance.Path(origin, target));
         currentPathPos = 0;
+    }
 
+    // Actions to reach a target. If there is no path, does nothing (sets currentPath to null).
+    IEnumerable<int> MoveTo(Vector2Int target) {
+        this.target = target;
+        ComputePath();
         if (currentPath == null) yield break;
 
         while (currentPathPos < currentPath.Count) {
@@ -164,6 +170,7 @@ public class Worker : MonoBehaviour {
         }
 
         animation.velocity = Vector3.zero;
+        this.target = new Vector2Int(-1, -1);
     }
 
     // Update is called once per frame

@@ -1,7 +1,6 @@
 Fix placement of resources in warehouse
 Optimize A* with roads heuristic
 Place roads by dragging
-Recompute current paths of AIs if a new building is created/destroyed
 Night
 Eating/Sleeping
 Breeders

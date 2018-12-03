@@ -260,6 +260,10 @@ public class WorldGrid : MonoBehaviour {
         }
 
         buildings.Add(b);
+
+        foreach (Worker w in FindObjectsOfType<Worker>()) {
+            w.ComputePath();
+        }
     }
 
     public void RemoveBuilding(Building b) {
@@ -272,6 +276,10 @@ public class WorldGrid : MonoBehaviour {
         }
 
         buildings.Remove(b);
+
+        foreach (Worker w in FindObjectsOfType<Worker>()) {
+            w.ComputePath();
+        }
     }
 
     // Returns all buildings of type B
