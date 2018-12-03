@@ -1,5 +1,5 @@
 Fixes
-- Building buildings of size 1
+- REDO model of warehouse
 - people watch what they're doing
 - Buildings wlick on banner build things
 - Meteorite water

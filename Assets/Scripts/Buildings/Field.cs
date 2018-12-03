@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Field : Building {
     public float matureTime = 15; // time in seconds
+    bool needFirstPlant = true;
 
     public struct Corn {
         public float plantTime;
@@ -26,7 +27,6 @@ public class Field : Building {
         for (int i = 0; i < corn.Length; i++) {
             corn[i].model = models[i];
             corn[i].maxStage = models[i].VoxelsList[models[i].VoxelsList.Count - 1].depth;
-            Replant(i);
         }
     }
 
@@ -56,6 +56,13 @@ public class Field : Building {
 
     new void Update() {
         base.Update();
+
+        if (needFirstPlant && IsFinished()) {
+            needFirstPlant = false;
+            for (int i = 0; i < corn.Length; i++) {
+                Replant(i);
+            }
+        }
 
         // Recompute stages, updating models if need be
         for (int i = 0; i < corn.Length; i++) {
