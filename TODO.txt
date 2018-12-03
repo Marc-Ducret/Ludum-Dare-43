@@ -22,19 +22,11 @@ Won't do
 - Meteorite water
 
 To balance:
-- speed of every class
-- night/day time -> more or less OK
-- road Factor -> OP, nerfed
-- animation times of every class
-- wood per tree
-- wood per building -> more or less OK
 - faith constants
 - food constants
-- apparition probz of classes -> nerf priests
 - debut town
 
 Destroy temple = big malus in faith
 Escape from meteorite: increase in faith?
 What is the point of roads? They have no cost
 GUI for houses?
-x1 x2 x4 buttons

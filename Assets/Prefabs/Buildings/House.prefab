@@ -413,7 +413,9 @@ MonoBehaviour:
   woodRequired: 2
   woodProvided: 0
   toDisableAsGhost: []
-  population: 5
+  buildingTime: 0
+  isBeingConstructed: 0
+  population: 3
   builder: {fileID: 8292785443639349832, guid: 0746a77e09f22f54e91f6298cf001e92, type: 3}
   breeder: {fileID: 7014191147872456226, guid: c3370da45a648e149b27d45a86629447, type: 3}
   priest: {fileID: 7401040462941301198, guid: fe1961c535f216d40ae30c9690f87719, type: 3}
@@ -424,8 +426,8 @@ MonoBehaviour:
   numPriests: 1
   numFarmers: 4
   numLoggers: 3
-  foodCost: 5
-  foodCapacity: 20
+  foodCost: 2
+  foodCapacity: 10
 --- !u!1 &6299273770700642849
 GameObject:
   m_ObjectHideFlags: 0
