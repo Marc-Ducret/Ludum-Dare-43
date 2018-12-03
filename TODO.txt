@@ -1,8 +1,8 @@
 Fixes
-- Buildings wlick on banner build things
 - Meteorite water
 
 Gameplay
+- See food inside house / animation for births
 - Animations for priests/sacrifice etc
 - Balance stuff
 - Polish camera (zoom, etc)

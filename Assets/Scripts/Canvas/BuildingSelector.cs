@@ -21,6 +21,12 @@ public class BuildingSelector : MonoBehaviour {
                 UpdateSelection(null);
                 return;
             }
+            if (ghost != null) {
+                bool valid = Input.mousePosition.y >= 100;
+                ghost.gameObject.SetActive(valid);
+                if (!valid) return;
+            }
+
             var ray = camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             Physics.Raycast(ray, out hit, 100, mask);
