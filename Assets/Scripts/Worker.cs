@@ -14,6 +14,7 @@ public class Worker : MonoBehaviour {
     public enum Job { Farmer, Builder, Breeder, Priest, Logger };
     bool isSacrificed = false;
     bool isReadyForSacrifice = false;
+    Temple temple;
     public Job job = Job.Farmer;
 
     public float baseVelocity = 3f;
@@ -266,12 +267,15 @@ public class Worker : MonoBehaviour {
             }
         }
         // Make sure the worker reached the temple
-        if (worker == null) yield break;
+        if (worker == null || worker.temple == null) yield break;
+        temple = worker.temple;
 
         // NOW KILL HIM
+        temple.StartSacrifice();
         animation.Act(5, 15);
         while (animation.IsActing) yield return 0;
-        worker.Die("was sacrificed by your Priest");
+        if (worker) worker.Die("was sacrificed by your Priest");
+        if (temple) temple.EndSacrifice();
         yield return 0;
     }
 
@@ -292,6 +296,7 @@ public class Worker : MonoBehaviour {
 
         // Wait to die
         isReadyForSacrifice = true;
+        this.temple = temple;
         while (true) yield return 0;
     }
 
@@ -351,7 +356,7 @@ public class Worker : MonoBehaviour {
                 float morning = Time.time;
                 foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Food), false)) {
                     if (w == null) {
-                        Debug.Log("Trying to eat " + Time.time + " " + morning + " " + starvingTime);
+                        //Debug.Log("Trying to eat " + Time.time + " " + morning + " " + starvingTime);
                         if (Time.time - morning >= starvingTime) {
                             Die("starved to death");
                         }
