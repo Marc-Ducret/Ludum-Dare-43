@@ -1,9 +1,7 @@
 Optimize A* with roads heuristic
 Prevent workers from running into each other
 Place roads by dragging
-Night
 Eating/Sleeping
-Breeders
 Priests: go to church to sacrifice
 Explication (notifications) when somebody dies
 Balance stuff

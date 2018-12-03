@@ -28,6 +28,8 @@ public class Worker : MonoBehaviour {
 
     IEnumerator<int> actions;
 
+    Notifications notif;
+
     // Start is called before the first frame update
     void Start() {
         currentPath = new List<Vector2Int>();
@@ -46,6 +48,8 @@ public class Worker : MonoBehaviour {
                 Debug.Log("Couldn't find a house when instatiating worker");
             }
         }
+
+        notif = FindObjectOfType<Notifications>();
     }
 
     IEnumerable<int> Actions() {
@@ -205,8 +209,8 @@ public class Worker : MonoBehaviour {
         }
 
         // TEMP: KILL HIM
-        Debug.Log("GOT");
-        //Destroy(target);
+        notif.Post("Your Priest sacrificed your " + worker.ToString());
+        worker.Die();
         yield return 0;
 
         // Go to the church
@@ -268,7 +272,6 @@ public class Worker : MonoBehaviour {
             yield return 0;
         }
     }
-
 
     IEnumerable<int> EatSleep() {
         bool isNight = false;
@@ -414,5 +417,12 @@ public class Worker : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         actions.MoveNext();
+    }
+
+    void Die() {
+        foreach(VoxelModel model in GetComponentsInChildren<VoxelModel>()) {
+            model.Explode();
+        }
+        Destroy(this);
     }
 }
