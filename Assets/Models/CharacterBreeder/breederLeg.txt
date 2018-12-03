@@ -1,7 +1,7 @@
 # Goxel 0.8.0
 # One line per voxel
 # X Y Z RRGGBB
-6 -5 1 dfdbdb
-6 -4 1 dfdbdb
-6 -5 2 dfdbdb
-6 -5 3 c0cddc
+4 -5 1 dfdada
+4 -4 1 dfdada
+4 -5 2 dfdada
+4 -5 3 e37cab

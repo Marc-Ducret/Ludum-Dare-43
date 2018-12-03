@@ -10,5 +10,7 @@ Balance stuff
 Polish camera (zoom, etc)
 Height: put road down or put charcters up
 Put a beard and maybe a cap to the loggers
+Make sure you can't interact with buildings in construction
 
 God gameplay: faith, cataclysm
+Music/suond?

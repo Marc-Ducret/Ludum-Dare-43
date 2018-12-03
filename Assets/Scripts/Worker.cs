@@ -13,8 +13,9 @@ using Random = UnityEngine.Random;
 public class Worker : MonoBehaviour {
     public enum Job { Farmer, Builder, Breeder, Priest, Logger };
     public Job job = Job.Farmer;
-    public float baseVelocity = 3f;
+    public Worker[] workerPrefabs;
 
+    public float baseVelocity = 3f;
     public float currentVelocity;
     public float height = 0f;
 
@@ -30,190 +31,303 @@ public class Worker : MonoBehaviour {
     // Start is called before the first frame update
     void Start() {
         currentPath = new List<Vector2Int>();
-        target = new Vector2Int(-1, -1); ;
-        actions = Actions().GetEnumerator();
+        target = new Vector2Int(-1, -1);
         currentVelocity = baseVelocity;
+        actions = Actions().GetEnumerator();
         animation = GetComponent<AnimateBody>();
 
         // Find a house
-        WorldGrid.InteractableBuilding<House> house = WorldGrid.instance.NearestBuilding<House>(WorldGrid.instance.GridPos(transform.position), h => h.HasRoom());
-        if (house.b != null) {
-            this.house = house.b;
-            this.house.Inhabit(this);
-        } else {
-            Debug.Log("Couldn't find a house when instatiating worker");
+        if (house == null) {
+            WorldGrid.InteractableBuilding<House> house = WorldGrid.instance.NearestBuilding<House>(WorldGrid.instance.GridPos(transform.position), h => h.HasRoom());
+            if (house.b != null) {
+                this.house = house.b;
+                this.house.Inhabit(this);
+            } else {
+                Debug.Log("Couldn't find a house when instatiating worker");
+            }
         }
     }
 
     IEnumerable<int> Actions() {
         switch (job) {
             case Job.Farmer:
-                while (true) {
-                    Field field = null;
-                    foreach (var f in FindBuilding<Field>(f => f.HasCorn())) {
-                        if (f == null) {
-                            yield return 0;
-                        } else {
-                            field = f;
-                        }
-                    }
-
-                    var corn = field.Harvest();
-                    Debug.Assert(corn >= 0, "Harvest failed");
-                    animation.Act(2, 1);
-                    while (animation.IsActing) yield return 0;
-                    field.Replant(corn);
-                    animation.Hold(Resource.Food);
-
-                    Warehouse warehouse = null;
-                    foreach (var w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Food))) {
-                        if (w == null) {
-                            yield return 0;
-                        } else {
-                            warehouse = w;
-                        }
-                    }
-
-                    Debug.Assert(warehouse.AddElement(Resource.Food), "Storing failed");
-                    animation.Drop();
-                    yield return 0;
-                }
+                while (true) foreach (int i in FarmerWork()) yield return 0;
 
             case Job.Logger:
-                while (true) {
-                    Tree tree = null;
-                    foreach (var t in FindBuilding<Tree>(t => !t.harvested)) {
-                        if (t == null) {
-                            yield return 0;
-                        } else {
-                            tree = t;
-                        }
-                    }
-
-                    tree.harvested = true;
-                    animation.Act(4, 3);
-                    while (animation.IsActing) yield return 0;
-                    tree.GetComponent<VoxelModel>().Explode();
-                    animation.Hold(Resource.Wood);
-
-                    Warehouse warehouse = null;
-                    foreach (var w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Wood))) {
-                        if (w == null) {
-                            yield return 0;
-                        } else {
-                            warehouse = w;
-                        }
-                    }
-
-                    Debug.Assert(warehouse.AddElement(Resource.Wood), "Storing failed");
-                    animation.Drop();
-                    yield return 0;
-                }
+                while (true) foreach (int i in LoggerWork()) yield return 0;
 
             case Job.Builder:
-                while (true) {
-                    Warehouse warehouse = null;
-                    foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Wood))) {
-                        if (w == null) {
-                            yield return 0;
-                        } else {
-                            warehouse = w;
-                        }
-                    }
-
-                    Debug.Assert(warehouse.RemoveElement(Resource.Wood), "Retrieve failed");
-                    animation.Hold(Resource.Wood);
-
-                    Building building = null;
-                    foreach (var b in FindBuilding<Building>(b => b.RequireMoreWood())) {
-                        if (b == null) {
-                            yield return 0;
-                        } else {
-                            building = b;
-                        }
-                    }
-
-                    animation.Drop();
-                    building.ProvideWood();
-                    animation.Act(5, 5);
-                    while (animation.IsActing) yield return 0;
-                    yield return 0;
-                }
+                while (true) foreach (int i in BuilderWork()) yield return 0;
 
             case Job.Priest:
-                while (true) {
-                    Worker worker = null;
-                    while (worker == null) {
-                        Worker[] workers = FindObjectsOfType<Worker>();
-                        if (workers.Length == 1) {
-                            // The only worker is ourself!
-                            yield return 0;
-                            continue;
-                        }
+                while (true) foreach (int i in PriestWork()) yield return 0;
 
-                        // Sample one random worker
-                        worker = this;
-                        while (worker == this) {
-                            // <= 2 iterations in expectation
-                            worker = workers[Random.Range(0, workers.Length)];
-                        }
+            case Job.Breeder:
+                while (true) foreach (int i in BreederWork()) yield return 0;
+        }
+    }
 
-                        // Now try to catch him
-                        // TODO: what if the worker dies in the meantime?
-                        while ((transform.position - worker.transform.position).sqrMagnitude >= 1) {
-                            bool gotPath = false;
-                            foreach (int i in MoveTo(WorldGrid.instance.GridPos(worker.transform.position))) {
-                                yield return 0;
-                                gotPath = true;
-                                break; // Only do the first step
-                            }
+    IEnumerable<int> FarmerWork() {
+        Field field = null;
+        foreach (var f in FindBuilding<Field>(f => f.HasCorn())) {
+            if (f == null) {
+                yield return 0;
+            } else {
+                field = f;
+            }
+        }
 
-                            if (!gotPath) {
-                                // There is no path to the target.
-                                if (WorldGrid.instance.GridPos(worker.transform.position) == WorldGrid.instance.GridPos(transform.position)) {
-                                    // We are on the same cell, in which case we just move in direction of the target to reach its real world pos
-                                    DirectMoveTo(worker.transform.position);
-                                    yield return 0;
-                                } else {
-                                    // The target is unreachable, in which case we should choose another
-                                    worker = null;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+        var corn = field.Harvest();
+        Debug.Assert(corn >= 0, "Harvest failed");
+        animation.Act(2, 1);
+        while (animation.IsActing) yield return 0;
+        field.Replant(corn);
+        animation.Hold(Resource.Food);
 
-                    // TEMP: KILL HIM
-                    Debug.Log("GOT");
-                    //Destroy(target);
+        Warehouse warehouse = null;
+        foreach (var w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Food))) {
+            if (w == null) {
+                yield return 0;
+            } else {
+                warehouse = w;
+            }
+        }
+
+        Debug.Assert(warehouse.AddElement(Resource.Food), "Storing failed");
+        animation.Drop();
+        yield return 0;
+    }
+
+    IEnumerable<int> LoggerWork() {
+        Tree tree = null;
+        foreach (var t in FindBuilding<Tree>(t => !t.harvested)) {
+            if (t == null) {
+                yield return 0;
+            } else {
+                tree = t;
+            }
+        }
+
+        tree.harvested = true;
+        animation.Act(4, 3);
+        while (animation.IsActing) yield return 0;
+        tree.GetComponent<VoxelModel>().Explode();
+        animation.Hold(Resource.Wood);
+
+        Warehouse warehouse = null;
+        foreach (var w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Wood))) {
+            if (w == null) {
+                yield return 0;
+            } else {
+                warehouse = w;
+            }
+        }
+
+        Debug.Assert(warehouse.AddElement(Resource.Wood), "Storing failed");
+        animation.Drop();
+        yield return 0;
+    }
+
+    IEnumerable<int> BuilderWork() {
+        Warehouse warehouse = null;
+        foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Wood))) {
+            if (w == null) {
+                yield return 0;
+            } else {
+                warehouse = w;
+            }
+        }
+
+        Debug.Assert(warehouse.RemoveElement(Resource.Wood), "Retrieve failed");
+        animation.Hold(Resource.Wood);
+
+        Building building = null;
+        foreach (var b in FindBuilding<Building>(b => b.RequireMoreWood())) {
+            if (b == null) {
+                yield return 0;
+            } else {
+                building = b;
+            }
+        }
+
+        animation.Drop();
+        building.ProvideWood();
+        animation.Act(5, 5);
+        while (animation.IsActing) yield return 0;
+        yield return 0;
+    }
+
+    IEnumerable<int> PriestWork() {
+        Worker worker = null;
+        while (worker == null) {
+            Worker[] workers = FindObjectsOfType<Worker>();
+            if (workers.Length == 1) {
+                // The only worker is ourself!
+                yield return 0;
+                continue;
+            }
+
+            // Sample one random worker
+            worker = this;
+            while (worker == this) {
+                // <= 2 iterations in expectation
+                worker = workers[Random.Range(0, workers.Length)];
+            }
+
+            // Now try to catch him
+            // TODO: what if the worker dies in the meantime?
+            while ((transform.position - worker.transform.position).sqrMagnitude >= 1) {
+                bool gotPath = false;
+                foreach (int i in MoveTo(WorldGrid.instance.GridPos(worker.transform.position))) {
                     yield return 0;
-
-                    // Go to the church
-
-                    //Debug.Assert(warehouse.RemoveElement(Resource.Wood), "Retrieve failed");
-                    //animation.Hold(Resource.Wood);
-
-                    //Building building = null;
-                    //foreach (var b in FindBuilding<Building>(b => !b.IsFinished())) {
-                    //    if (b == null) {
-                    //        yield return 0;
-                    //    } else {
-                    //        building = b;
-                    //    }
-                    //}
-
-                    //animation.Drop();
-                    //animation.acting = 1;
-                    //while (animation.acting > 0) yield return 0;
-                    //building.ProvideWood();
-                    //yield return 0;
+                    gotPath = true;
+                    break; // Only do the first step
                 }
+
+                if (!gotPath) {
+                    // There is no path to the target.
+                    if (WorldGrid.instance.GridPos(worker.transform.position) == WorldGrid.instance.GridPos(transform.position)) {
+                        // We are on the same cell, in which case we just move in direction of the target to reach its real world pos
+                        DirectMoveTo(worker.transform.position);
+                        yield return 0;
+                    } else {
+                        // The target is unreachable, in which case we should choose another
+                        worker = null;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // TEMP: KILL HIM
+        Debug.Log("GOT");
+        //Destroy(target);
+        yield return 0;
+
+        // Go to the church
+
+        //Debug.Assert(warehouse.RemoveElement(Resource.Wood), "Retrieve failed");
+        //animation.Hold(Resource.Wood);
+
+        //Building building = null;
+        //foreach (var b in FindBuilding<Building>(b => !b.IsFinished())) {
+        //    if (b == null) {
+        //        yield return 0;
+        //    } else {
+        //        building = b;
+        //    }
+        //}
+
+        //animation.Drop();
+        //animation.acting = 1;
+        //while (animation.acting > 0) yield return 0;
+        //building.ProvideWood();
+        //yield return 0;
+    }
+
+    IEnumerable<int> BreederWork() {
+        Warehouse warehouse = null;
+        foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Food))) {
+            if (w == null) {
+                yield return 0;
+            } else {
+                warehouse = w;
+            }
+        }
+
+        Debug.Assert(warehouse.RemoveElement(Resource.Food), "Retrieve failed");
+        animation.Hold(Resource.Food);
+
+        House h = null;
+        foreach (var b in FindBuilding<House>(b => b.HasRoom())) {
+            if (b == null) {
+                yield return 0;
+            } else {
+                h = b;
+            }
+        }
+
+        animation.Drop();
+        bool create = h.AddFood();
+        yield return 0;
+        if (create) {
+            animation.Act(5, 5);
+            while (animation.IsActing) {
+                yield return 0;
+            }
+
+            Worker w = Instantiate(workerPrefabs[Random.Range(0, workerPrefabs.Length)]);
+            w.transform.position = transform.position;
+            w.transform.rotation = transform.rotation;
+            Debug.Log("Created " + w.ToString() + " at " + w.transform.position.ToString());
+            yield return 0;
+        }
+    }
+
+
+    IEnumerable<int> EatSleep() {
+        bool isNight = false;
+        bool isTooLate = false;
+        bool hungry = false;
+
+        if (isTooLate) {
+            Debug.Log("Too late to sleep!");
+        } else if (isNight) {
+            bool reachedHouse = false;
+            foreach (bool b in GoToSleep()) {
+                if (b) {
+                    reachedHouse = true;
+                } else {
+                    yield return 0;
+                }
+            }
+            if (!reachedHouse) {
+                Debug.Log("Couldn't reach house!");
+            }
+        } else if (hungry) {
+            Warehouse warehouse = null;
+            foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Food))) {
+                if (w == null) {
+                    yield return 0;
+                } else {
+                    warehouse = w;
+                }
+            }
+
+            Debug.Assert(warehouse.RemoveElement(Resource.Food), "Retrieve failed");
+            yield return 0;
+        }
+    }
+
+    // Actions to go to your house. If succeeded, yields a single true at the end
+    IEnumerable<bool> GoToSleep() {
+        if (house == null) {
+            yield break;
+        }
+
+        // Go to your house
+        House h = null;
+        foreach (var b in FindBuilding<House>(b => b == house, false)) {
+            if (b == null) {
+                yield return false;
+            } else {
+                h = b;
+            }
+        }
+
+        if (h != null) {
+            yield return true;
         }
     }
 
     // Yields action to go to a building with the required predicate. Returns null until the last step, which is the found building.
-    IEnumerable<B> FindBuilding<B>(Func<B, bool> pred) where B : Building {
+    IEnumerable<B> FindBuilding<B>(Func<B, bool> pred, bool overrideEatSleep = true) where B : Building {
         while (true) {
+            if (overrideEatSleep)
+                foreach (int i in EatSleep()) {
+                    yield return null;
+                }
+
             WorldGrid.InteractableBuilding<B> target = WorldGrid.instance.NearestBuilding(WorldGrid.instance.GridPos(transform.position), pred);
             if (target.b == null) {
                 // No building could be found, wait and restart!

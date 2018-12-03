@@ -47,10 +47,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   job: 2
+  workerPrefabs:
+  - {fileID: 7014191147872456226, guid: c3370da45a648e149b27d45a86629447, type: 3}
+  - {fileID: 8292785443639349832, guid: 0746a77e09f22f54e91f6298cf001e92, type: 3}
+  - {fileID: 8225355981523129904, guid: ea873a73d470fe94eb0edd3ca0860af3, type: 3}
+  - {fileID: 5384124188848056072, guid: 20a67690863a17a4d9ce5ca4db7d22d0, type: 3}
+  - {fileID: 7401040462941301198, guid: fe1961c535f216d40ae30c9690f87719, type: 3}
   baseVelocity: 10
   currentVelocity: 0
   height: 0
-  target: {x: 0, y: 0}
+  house: {fileID: 0}
 --- !u!114 &4237310964766333756
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,7 +74,6 @@ MonoBehaviour:
   smooth: 0.25
   animationSpeed: 0.75
   velocity: {x: 0, y: 0}
-  acting: 0
   harvestPrefabs:
   - {fileID: 5529161066980595300, guid: 20d2f2cc727cea8478ea53c9dcb0059f, type: 3}
   - {fileID: 5529161066980595300, guid: cb3014c1aca27064a89998b6cb534276, type: 3}

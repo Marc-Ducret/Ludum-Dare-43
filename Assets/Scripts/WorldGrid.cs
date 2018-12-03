@@ -134,7 +134,7 @@ public class WorldGrid : MonoBehaviour {
         }
         foreach (Vector2Int target in targets) {
             if (!cells[target.y, target.x].isWalkable) {
-                Debug.LogError("Un-walkable target");
+                Debug.LogError("Un-walkable target " + target.ToString());
                 return null;
             }
         }

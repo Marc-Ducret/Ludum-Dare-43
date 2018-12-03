@@ -6,6 +6,9 @@ public class House : Building {
     public int population = 4;
     Worker[] inhabitants;
 
+    public int foodRequired = 3;
+    int foodStored;
+
     // Start is called before the first frame update
     new void Start() {
         base.Start();
@@ -27,6 +30,15 @@ public class House : Building {
                 w.house = this;
                 return true;
             }
+        }
+        return false;
+    }
+
+    public bool AddFood() {
+        foodStored++;
+        if (foodStored == foodRequired) {
+            foodStored = 0;
+            return true;
         }
         return false;
     }

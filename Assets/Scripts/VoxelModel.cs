@@ -56,6 +56,8 @@ public class VoxelModel : MonoBehaviour {
     public Voxel[,,] Voxels { get; private set; }
     public List<Voxel> VoxelsList { get; private set; }
 
+    private float explodeDuration = 2f;
+
     private Voxel GetVoxel(Vector3Int pos) {
         if (pos.x < 0 || pos.y < 0 || pos.z < 0 || pos.x >= Size.x || pos.y >= Size.y || pos.z >= Size.z)
             return new Voxel();
@@ -181,7 +183,7 @@ public class VoxelModel : MonoBehaviour {
             particle.AddExplosionForce(force, groundCenter, Size.magnitude);
             SetMeshColor(particle.GetComponent<MeshFilter>().mesh, voxel.color);
 
-            Destroy(particle.gameObject, 500);
+            Destroy(particle.gameObject, explodeDuration);
         }
         Destroy(gameObject);
     }
