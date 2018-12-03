@@ -38,10 +38,10 @@ public class Worker : MonoBehaviour {
 
         // Find a house
         if (house == null) {
-            WorldGrid.InteractableBuilding<House> house = WorldGrid.instance.NearestBuilding<House>(WorldGrid.instance.GridPos(transform.position), h => h.HasRoom());
-            if (house.b != null) {
-                this.house = house.b;
-                this.house.Inhabit(this);
+            WorldGrid.InteractableBuilding<House> h = WorldGrid.instance.NearestBuilding<House>(WorldGrid.instance.GridPos(transform.position), b => b.HasRoom());
+            if (h.b != null) {
+                house = h.b;
+                house.Inhabit(this);
             } else {
                 Debug.Log("Couldn't find a house when instatiating worker");
             }
