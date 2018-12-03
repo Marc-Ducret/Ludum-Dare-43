@@ -12,6 +12,7 @@ public class AnimateBody : MonoBehaviour {
     public float animationSpeed;
 
     public Vector2 velocity;
+    public float verticalOffset;
     
     private float acting;
     private float actDuration;
@@ -41,6 +42,9 @@ public class AnimateBody : MonoBehaviour {
     }
     
     private void Update() {
+        var gridPos = WorldGrid.instance.GridPos(transform.position);
+        verticalOffset = WorldGrid.instance.cells[gridPos.y, gridPos.x].isRoad ? WorldGrid.instance.scale / 8 : 0;
+        
         runIntensity = Mathf.Lerp(runIntensity, velocity.magnitude / maxVelocity, Time.deltaTime / smooth);
         runIntensity = Mathf.Min(1, runIntensity);
 
@@ -69,6 +73,9 @@ public class AnimateBody : MonoBehaviour {
                 Time.deltaTime / smooth
             );
         }
+
+        var y = Mathf.Lerp(Vector3.Dot(transform.position, Vector3.up), verticalOffset, Time.deltaTime / smooth);
+        transform.position = Vector3.ProjectOnPlane(transform.position, Vector3.up) + y * Vector3.up;
     }
 
     public void Hold(Resource res) {

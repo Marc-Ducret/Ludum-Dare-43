@@ -90,10 +90,11 @@ public class Building : MonoBehaviour {
     [ContextMenu("Provide Wood")]
     public void ProvideWood() {
         woodProvided++;
-        UpdateModel();
     }
 
     private void UpdateModel() {
         model.GenerateMesh(modelDepth);
+        for (var i = 0; i < transform.childCount; i++)
+            transform.GetChild(i).gameObject.SetActive(IsFinished());
     }
 }

@@ -40,10 +40,10 @@ public class Worker : MonoBehaviour {
 
         // Find a house
         if (house == null) {
-            WorldGrid.InteractableBuilding<House> house = WorldGrid.instance.NearestBuilding<House>(WorldGrid.instance.GridPos(transform.position), h => h.HasRoom());
-            if (house.b != null) {
-                this.house = house.b;
-                this.house.Inhabit(this);
+            WorldGrid.InteractableBuilding<House> h = WorldGrid.instance.NearestBuilding<House>(WorldGrid.instance.GridPos(transform.position), b => b.HasRoom());
+            if (h.b != null) {
+                house = h.b;
+                house.Inhabit(this);
             } else {
                 Debug.Log("Couldn't find a house when instatiating worker");
             }
@@ -182,10 +182,11 @@ public class Worker : MonoBehaviour {
             // TODO: what if the worker dies in the meantime?
             while ((transform.position - worker.transform.position).sqrMagnitude >= 1) {
                 bool gotPath = false;
+                int steps = 60;
                 foreach (int i in MoveTo(WorldGrid.instance.GridPos(worker.transform.position))) {
                     yield return 0;
                     gotPath = true;
-                    break; // Only do the first step
+                    if (--steps <= 0) break;
                 }
                 if (abortMoveTo) {
                     // For some reason the target became unwalkable, just choose another
@@ -407,7 +408,7 @@ public class Worker : MonoBehaviour {
         currentVelocity = baseVelocity * (WorldGrid.instance.cells[pos.y, pos.x].isRoad ? WorldGrid.roadFactor : 1f);
 
         // Move to objective
-        Vector3 delta = target - transform.position;
+        Vector3 delta = Vector3.ProjectOnPlane(target - transform.position, Vector3.up);
         delta = delta * Mathf.Min(1, currentVelocity * Time.deltaTime / delta.magnitude);
         transform.position += delta;
         animation.velocity.x = delta.x / Time.deltaTime;
