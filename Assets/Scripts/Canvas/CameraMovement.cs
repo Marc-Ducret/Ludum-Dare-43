@@ -38,6 +38,6 @@ public class CameraMovement : MonoBehaviour {
     }
 
     private void Move(Vector3 direction) {
-        velocity += direction * Time.deltaTime * acceleration;
+        velocity += direction * Time.unscaledDeltaTime * acceleration;
     }
 }
