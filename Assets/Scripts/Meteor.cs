@@ -3,20 +3,32 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(VoxelModel))]
-[RequireComponent(typeof(Rigidbody))]
 public class Meteor : MonoBehaviour {
 
-    public Vector3 initialVelocity;
+    private Vector3 velocity;
+    public float verticalVelocity;
+    public float horizontalVelocity;
+    public float noise;
+    public float fallDelay;
     public float radius;
     
     private VoxelModel model;
     
     private void Start() {
         model = GetComponent<VoxelModel>();
-        GetComponent<Rigidbody>().velocity = initialVelocity;
+        velocity = new Vector3(
+            horizontalVelocity * (Random.value-.5f) * 2, 
+            verticalVelocity, 
+            horizontalVelocity * (Random.value-.5f) * 2);
+        transform.position += new Vector3(
+            noise * (Random.value-.5f) * 2, 
+            0, 
+            noise * (Random.value-.5f) * 2);
+        transform.position -= velocity / fallDelay;
     }
 
     private void Update() {
+        transform.position += velocity * Time.deltaTime;
         if (transform.position.y < .1f) {
             foreach(var worker in FindObjectsOfType<Worker>())
                 if (Vector3.ProjectOnPlane(worker.transform.position - transform.position, Vector3.up).sqrMagnitude <

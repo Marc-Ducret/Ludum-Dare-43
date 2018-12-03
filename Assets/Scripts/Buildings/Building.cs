@@ -16,6 +16,8 @@ public class Building : MonoBehaviour {
     private float progress;
     private int modelDepth;
 
+    public MonoBehaviour[] toDisableAsGhost;
+
     public void Start() {
         pos = WorldGrid.instance.GridPos(transform.position);
 
