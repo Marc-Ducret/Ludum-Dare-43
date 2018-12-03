@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5529161066980595321}
   - component: {fileID: 5529161066980595302}
   - component: {fileID: 5529161066980595303}
-  - component: {fileID: 6100048404642915910}
+  - component: {fileID: 2921195284860149301}
   m_Layer: 0
   m_Name: Temple
   m_TagString: Untagged
@@ -98,7 +98,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &6100048404642915910
+--- !u!114 &2921195284860149301
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -108,10 +108,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_GeneratorAsset: {fileID: 0}
-  m_Script: {fileID: 11500000, guid: cbb5c10a29ef8ae4a975bc2cf930666a, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e3f025007d0c324f9b8a0b85b0a8b9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pos: {x: 0, y: 0}
   size: {x: 3, y: 3}
   isWalkable: 0
   woodRequired: 5
+  woodProvided: 0

@@ -51,10 +51,12 @@ public class Field : Building {
 
         return -1;
     }
-    
-    
 
-    private void Update() {
+
+
+    new void Update() {
+        base.Update();
+
         // Recompute stages, updating models if need be
         for (int i = 0; i < corn.Length; i++) {
             int stage = (int)(corn[i].maxStage * Mathf.Min(1, (Time.time - corn[i].plantTime) / matureTime));

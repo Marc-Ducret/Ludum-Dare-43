@@ -61,7 +61,7 @@ public class Building : MonoBehaviour {
         return l.FindAll(p => WorldGrid.instance.IsValid(p) && WorldGrid.instance.IsWalkable(p));
     }
 
-    private void Update() {
+    public void Update() {
         if (woodRequired == 0) progress = 1;
         else {
             progress = Mathf.Min(
