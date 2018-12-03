@@ -47,6 +47,7 @@ public class BuildingSelector : MonoBehaviour {
         if (selected != null) {
             ghost = Instantiate(selected.buildingPrefab);
             ghost.enabled = false;
+            foreach (var behavior in ghost.toDisableAsGhost) behavior.enabled = false;
             ghost.GetComponent<MeshRenderer>().material = ghostMaterial;
         }
     }
