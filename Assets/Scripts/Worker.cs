@@ -39,9 +39,8 @@ public class Worker : MonoBehaviour {
         switch (job) {
             case Job.Farmer:
                 while (true) {
-                    // Find a suitable field
                     Field field = null;
-                    foreach (Field f in FindBuilding<Field>(f => f.HasCorn())) {
+                    foreach (var f in FindBuilding<Field>(f => f.HasCorn())) {
                         if (f == null) {
                             yield return 0;
                         } else {
@@ -49,14 +48,15 @@ public class Worker : MonoBehaviour {
                         }
                     }
 
-                    Debug.Assert(field.Harvest(), "Harvest failed");
-                    animation.acting = 1;
-                    while (animation.acting > 0) yield return 0;
+                    var corn = field.Harvest();
+                    Debug.Assert(corn >= 0, "Harvest failed");
+                    animation.Act(2, 1);
+                    while (animation.IsActing) yield return 0;
+                    field.Replant(corn);
                     animation.Hold(Resource.Food);
 
-                    // Find a suitable warehouse
                     Warehouse warehouse = null;
-                    foreach (Warehouse w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Food))) {
+                    foreach (var w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Food))) {
                         if (w == null) {
                             yield return 0;
                         } else {
@@ -72,7 +72,7 @@ public class Worker : MonoBehaviour {
             case Job.Logger:
                 while (true) {
                     Tree tree = null;
-                    foreach (Tree t in FindBuilding<Tree>(t => true)) {
+                    foreach (var t in FindBuilding<Tree>(t => !t.harvested)) {
                         if (t == null) {
                             yield return 0;
                         } else {
@@ -80,14 +80,14 @@ public class Worker : MonoBehaviour {
                         }
                     }
 
+                    tree.harvested = true;
+                    animation.Act(4, 3);
+                    while (animation.IsActing) yield return 0;
                     tree.GetComponent<VoxelModel>().Explode();
-                    animation.acting = 1;
-                    while (animation.acting > 0) yield return 0;
                     animation.Hold(Resource.Wood);
 
-                    // Find a suitable warehouse
                     Warehouse warehouse = null;
-                    foreach (Warehouse w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Wood))) {
+                    foreach (var w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Wood))) {
                         if (w == null) {
                             yield return 0;
                         } else {
@@ -103,7 +103,7 @@ public class Worker : MonoBehaviour {
             case Job.Builder:
                 while (true) {
                     Warehouse warehouse = null;
-                    foreach (Warehouse w in FindBuilding<Warehouse>(w => w.Has(Resource.Wood))) {
+                    foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Wood))) {
                         if (w == null) {
                             yield return 0;
                         } else {
@@ -115,7 +115,7 @@ public class Worker : MonoBehaviour {
                     animation.Hold(Resource.Wood);
 
                     Building building = null;
-                    foreach (var b in FindBuilding<Building>(b => !b.IsFinished())) {
+                    foreach (var b in FindBuilding<Building>(b => b.RequireMoreWood())) {
                         if (b == null) {
                             yield return 0;
                         } else {
@@ -124,9 +124,9 @@ public class Worker : MonoBehaviour {
                     }
 
                     animation.Drop();
-                    animation.acting = 1;
-                    while (animation.acting > 0) yield return 0;
                     building.ProvideWood();
+                    animation.Act(5, 5);
+                    while (animation.IsActing) yield return 0;
                     yield return 0;
                 }
 
