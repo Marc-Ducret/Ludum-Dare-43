@@ -34,7 +34,9 @@ public class Worker : MonoBehaviour {
 
     Notifications notif;
     private Faith faith;
-    
+
+    [HideInInspector]
+    public House house;
 
     // Start is called before the first frame update
     void Start() {
@@ -71,6 +73,18 @@ public class Worker : MonoBehaviour {
         }
     }
 
+    private Vector3 InteractionWorldPos(Building b) {
+        var pos = Vector3.down * 500;
+        for(var y = b.pos.y; y < b.pos.y + b.size.y; y++)
+        for (var x = b.pos.x; x < b.pos.x + b.size.x; x++) {
+            var bPos = WorldGrid.instance.RealPos(new Vector2Int(x, y));
+            if ((bPos - transform.position).sqrMagnitude < (pos - transform.position).sqrMagnitude)
+                pos = bPos;
+        }
+
+        return pos;
+    }
+
     IEnumerable<int> FarmerWork() {
         Field field = null;
         foreach (var f in FindBuilding<Field>(f => f.HasCorn())) {
@@ -83,7 +97,7 @@ public class Worker : MonoBehaviour {
 
         var corn = field.Harvest();
         Debug.Assert(corn >= 0, "Harvest failed");
-        animation.Act(2, 1);
+        animation.Act(2, 1, InteractionWorldPos(field));
         while (animation.IsActing) yield return 0;
         if (field == null) yield break;
         field.Replant(corn);
@@ -114,7 +128,7 @@ public class Worker : MonoBehaviour {
         }
 
         tree.harvested = true;
-        animation.Act(4, 3);
+        animation.Act(4, 3, InteractionWorldPos(tree));
         while (animation.IsActing) yield return 0;
         if (tree == null) yield break;
         tree.GetComponent<VoxelModel>().Explode();
@@ -158,7 +172,7 @@ public class Worker : MonoBehaviour {
 
         animation.Drop();
         building.ProvideWood();
-        animation.Act(5, 5);
+        animation.Act(5, 5, InteractionWorldPos(building));
         while (animation.IsActing) yield return 0;
         if (building == null) yield break;
         yield return 0;
@@ -225,7 +239,7 @@ public class Worker : MonoBehaviour {
         // Get him!
         worker.isSacrificed = true;
         worker.actions = worker.Actions().GetEnumerator();
-        animation.Act(1, 3);
+        animation.Act(1, 3, worker.transform.position);
         while (animation.IsActing) yield return 0;
 
         // Follow the poor guy to the temple
@@ -272,7 +286,7 @@ public class Worker : MonoBehaviour {
 
         // NOW KILL HIM
         temple.StartSacrifice();
-        animation.Act(5, 15);
+        animation.Act(5, 15, worker.transform.position);
         while (animation.IsActing) yield return 0;
         if (worker) worker.Die("was sacrificed by your Priest");
         if (temple) temple.EndSacrifice();
@@ -324,7 +338,7 @@ public class Worker : MonoBehaviour {
 
         animation.Drop();
         h.AddFood();
-        animation.Act(1, 1);
+        animation.Act(1, 1, InteractionWorldPos(h));
         while (animation.IsActing) {
             yield return 0;
         }
@@ -332,24 +346,25 @@ public class Worker : MonoBehaviour {
 
     IEnumerable<int> EatSleep() {
         if (WorldGrid.instance.night) {
-            House h = null;
+            house = null;
             foreach (var b in FindBuilding<House>(b => b.HasRoom(), false, true)) {
                 if (b == null) {
                     yield return 0;
                 } else {
-                    h = b;
+                    house = b;
                 }
             }
 
-            h.Inhabit();
+            house.Inhabit();
             isSleeping = true;
             gameObject.SetActive(false);
             WorldGrid.instance.sleepers.Add(this);
             yield return 0;
 
             // Awake, try to eat inside the house
-            bool hasEaten = h.TryEat();
-            h.Leave();
+            bool hasEaten = house.TryEat();
+            house.Leave();
+            house = null;
             if (!hasEaten) {
                 // Go to eat outside
                 Warehouse warehouse = null;
@@ -455,8 +470,7 @@ public class Worker : MonoBehaviour {
         Vector3 delta = Vector3.ProjectOnPlane(target - transform.position, Vector3.up);
         delta = delta * Mathf.Min(1, currentVelocity * Time.deltaTime / delta.magnitude);
         transform.position += delta;
-        animation.velocity.x = delta.x / Time.deltaTime;
-        animation.velocity.y = delta.z / Time.deltaTime;
+        animation.velocity = delta / Time.deltaTime;
     }
 
     // Update is called once per frame

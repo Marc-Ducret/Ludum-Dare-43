@@ -114,8 +114,9 @@ MonoBehaviour:
   pos: {x: 0, y: 0}
   size: {x: 2, y: 2}
   isWalkable: 0
-  woodRequired: 1
+  woodRequired: 3
   woodProvided: 0
+  toDisableAsGhost: []
   woodPrefab: {fileID: 5529161066980595300, guid: 20d2f2cc727cea8478ea53c9dcb0059f,
     type: 3}
   foodPrefab: {fileID: 5529161066980595300, guid: 5bf902753fe760047af1f5edee8e0963,
