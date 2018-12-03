@@ -133,11 +133,13 @@ public class WorldGrid : MonoBehaviour {
 
     // Stop as soon as we reached one target
     public PathInfo[,] AStar(Vector2Int origin, List<Vector2Int> targets) {
-        if (targets.Count > 100) {
-            targets = targets.ToList();
-            targets.Sort((tA, tB) => (tA - origin).sqrMagnitude.CompareTo((tB - origin).sqrMagnitude));
-            targets = targets.Take(100).ToList();
+        targets = targets.ToList();
+        targets.Sort((tA, tB) => (tA - origin).sqrMagnitude.CompareTo((tB - origin).sqrMagnitude));
+        if (targets.Count > 50) {
+            targets = targets.Take(50).ToList();
         }
+        var roadF = (targets[0] - origin).sqrMagnitude <= 20*20 ? roadFactor : 1;
+        
         foreach (Vector2Int target in targets) {
             if (!cells[target.y, target.x].isWalkable) {
                 Debug.LogError("Un-walkable target " + target.ToString());
@@ -158,7 +160,7 @@ public class WorldGrid : MonoBehaviour {
                 dTarget = Mathf.Min(dTarget, (target - pos).sqrMagnitude);
             }
 
-            dTarget = Mathf.Sqrt(dTarget) / roadFactor;
+            dTarget = Mathf.Sqrt(dTarget) / roadF;
             toVisit.Enqueue(new Position(pos, father, dOrigin, dTarget));
         };
 
@@ -181,7 +183,7 @@ public class WorldGrid : MonoBehaviour {
             if (done)
                 break;
             foreach (Neighbor n in Neighbors(c.pos)) {
-                enqueue(n.pos, c.pos, c.distanceFromOrigin + n.distance / (cells[c.pos.y, c.pos.x].isRoad ? roadFactor : 1));
+                enqueue(n.pos, c.pos, c.distanceFromOrigin + n.distance / (cells[c.pos.y, c.pos.x].isRoad ? roadF : 1));
             }
         }
 

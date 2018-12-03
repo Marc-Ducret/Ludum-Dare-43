@@ -178,10 +178,11 @@ public class Worker : MonoBehaviour {
             // TODO: what if the worker dies in the meantime?
             while ((transform.position - worker.transform.position).sqrMagnitude >= 1) {
                 bool gotPath = false;
+                int steps = 60;
                 foreach (int i in MoveTo(WorldGrid.instance.GridPos(worker.transform.position))) {
                     yield return 0;
                     gotPath = true;
-                    break; // Only do the first step
+                    if (--steps <= 0) break;
                 }
                 if (abortMoveTo) {
                     // For some reason the target became unwalkable, just choose another

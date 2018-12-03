@@ -56,7 +56,7 @@ public class VoxelModel : MonoBehaviour {
     public Voxel[,,] Voxels { get; private set; }
     public List<Voxel> VoxelsList { get; private set; }
 
-    private float explodeDuration = 2f;
+    private float explodeDuration = 20f;
 
     private Voxel GetVoxel(Vector3Int pos) {
         if (pos.x < 0 || pos.y < 0 || pos.z < 0 || pos.x >= Size.x || pos.y >= Size.y || pos.z >= Size.z)
@@ -172,12 +172,13 @@ public class VoxelModel : MonoBehaviour {
         const float force = 200f;
         var groundCenter = transform.position;
         var origin = transform.position;
-        if (horizontalCenter) origin -= Vector3.ProjectOnPlane(Size, Vector3.up) / 2;
-        else groundCenter += Vector3.ProjectOnPlane(Size, Vector3.up) / 2;
+        var offset = transform.TransformVector(Vector3.ProjectOnPlane(Size, Vector3.up) / 2);
+        if (horizontalCenter) origin -= offset;
+        else groundCenter += offset;
         foreach (var voxel in VoxelsList) {
             var particle = Instantiate(
                 particlePrefab,
-                origin + transform.TransformVector(voxel.pos) + Vector3.one * .5F,
+                origin + transform.TransformVector(voxel.pos + Vector3.one * .5F),
                 transform.rotation
             );
             particle.transform.localScale = transform.lossyScale;
