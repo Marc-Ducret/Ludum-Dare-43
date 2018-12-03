@@ -35,12 +35,11 @@ public class WorldGrid : MonoBehaviour {
         public float distanceFromOrigin;
         public float estimatedTotalDistance;
 
-        public Position(Vector2Int pos, Vector2Int father, float dOrigin, Vector2Int target) {
+        public Position(Vector2Int pos, Vector2Int father, float dOrigin, float dTarget) {
             this.pos = pos;
             this.father = father;
             distanceFromOrigin = dOrigin;
-            Vector2Int delta = target - pos;
-            estimatedTotalDistance = dOrigin + (Mathf.Abs(delta.x) + Mathf.Abs(delta.y)) / roadFactor;
+            estimatedTotalDistance = dOrigin + dTarget;
         }
 
         public int CompareTo(Position other) {
@@ -105,7 +104,7 @@ public class WorldGrid : MonoBehaviour {
                     cells[y, x].isBuildable = false;
                     cells[y, x].isWalkable = false;
                 }
-                
+
             }
         }
         PlaceTrees();
@@ -128,15 +127,31 @@ public class WorldGrid : MonoBehaviour {
         return neighbors;
     }
 
-    public PathInfo[,] AStar(Vector2Int origin, Vector2Int target) {
-        PathInfo[,] path = new PathInfo[height, width];
-        PriorityQueue<Position> toVisit = new PriorityQueue<Position>();
-        toVisit.Enqueue(new Position(origin, origin, 0, target));
-
-        if (!cells[target.y, target.x].isWalkable) {
-            Debug.LogError("Un-walkable target");
-            return null;
+    // Stop as soon as we reached one target
+    public PathInfo[,] AStar(Vector2Int origin, List<Vector2Int> targets) {
+        foreach (Vector2Int target in targets) {
+            if (!cells[target.y, target.x].isWalkable) {
+                Debug.LogError("Un-walkable target");
+                return null;
+            }
         }
+
+        PathInfo[,] path = new PathInfo[height, width];
+        if (targets.Count == 0) {
+            return path;
+        }
+
+        PriorityQueue<Position> toVisit = new PriorityQueue<Position>();
+
+        Action<Vector2Int, Vector2Int, float> enqueue = (Vector2Int pos, Vector2Int father, float dOrigin) => {
+            float dTarget = Mathf.Infinity;
+            foreach (Vector2Int target in targets) {
+                dTarget = Mathf.Min(dTarget, (target - pos).magnitude / roadFactor);
+            }
+            toVisit.Enqueue(new Position(pos, father, dOrigin, dTarget));
+        };
+
+        enqueue(origin, origin, 0);
 
         while (toVisit.Count() > 0) {
             Position c = toVisit.Dequeue();
@@ -144,30 +159,35 @@ public class WorldGrid : MonoBehaviour {
                 continue;
             }
             path[c.pos.y, c.pos.x] = new PathInfo(c.father, c.distanceFromOrigin);
-            if (c.pos == target) {
+            bool done = false;
+            foreach (Vector2Int target in targets)
+                if (c.pos == target) {
+                    done = true;
+                    break;
+                }
+            if (done)
                 break;
-            }
             foreach (Neighbor n in Neighbors(c.pos)) {
-                Position d = new Position(n.pos, c.pos, c.distanceFromOrigin + n.distance / (cells[c.pos.y, c.pos.x].isRoad ? roadFactor : 1), target);
-                toVisit.Enqueue(d);
+                enqueue(n.pos, c.pos, c.distanceFromOrigin + n.distance / (cells[c.pos.y, c.pos.x].isRoad ? roadFactor : 1));
             }
         }
 
         return path;
     }
 
-    public List<float> ComputeDistances(Vector2Int origin, List<Vector2Int> targets) {
-        // TODO: do something smarter than n A*
-        List<float> distances = new List<float>();
-        foreach (Vector2Int target in targets) {
-            PathInfo[,] path = AStar(origin, target);
-            distances.Add(path == null ? Mathf.Infinity : path[target.y, target.x].distance);
+    public int NearestTarget(Vector2Int origin, List<Vector2Int> targets) {
+        PathInfo[,] path = AStar(origin, targets);
+        for (int i = 0; i < targets.Count; i++) {
+            if (path[targets[i].y, targets[i].x].visited)
+                return i;
         }
-        return distances;
+        return -1;
     }
 
     public List<Vector2Int> Path(Vector2Int origin, Vector2Int target) {
-        PathInfo[,] path = AStar(origin, target);
+        List<Vector2Int> targets = new List<Vector2Int>();
+        targets.Add(target);
+        PathInfo[,] path = AStar(origin, targets);
 
         List<Vector2Int> positions = new List<Vector2Int>();
         Vector2Int cur = target;
@@ -253,47 +273,32 @@ public class WorldGrid : MonoBehaviour {
         }
     }
 
-    public struct DistantB<B> : IComparable<DistantB<B>> where B : Building {
+    public struct InteractableBuilding<B> where B : Building {
         public B b;
         public Vector2Int pos; // Interaction position
-        public float distance; // Distance from origin
 
-        public DistantB(B b, Vector2Int pos, float distance) {
+        public InteractableBuilding(B b, Vector2Int pos) {
             this.b = b;
             this.pos = pos;
-            this.distance = distance;
-        }
-
-        public int CompareTo(DistantB<B> other) {
-            return this.distance.CompareTo(other.distance);
         }
     }
 
-    // Returns all buildings of type B, sorted by increasing distance from pos
-    public IEnumerable<DistantB<B>> Buildings<B>(Vector2Int pos) where B : Building {
-        List<DistantB<B>> bs = new List<DistantB<B>>();
+    // Returns position of nearest building of type B with predicate being true
+    public InteractableBuilding<B> NearestBuilding<B>(Vector2Int pos, Func<B, bool> pred) where B : Building {
+        List<Vector2Int> positions = new List<Vector2Int>();
+        List<B> buildings = new List<B>();
         foreach (B b in Buildings<B>()) {
-            List<Vector2Int> positions = b.InteractionPositions();
-            List<float> distances = ComputeDistances(pos, positions);
-
-            // Get best position
-            int best = -1;
-            float bestDistance = Mathf.Infinity;
-            for (int i = 0; i < distances.Count; i++) {
-                if (distances[i] < bestDistance) {
-                    best = i;
-                    bestDistance = distances[i];
+            if (pred(b))
+                foreach (Vector2Int p in b.InteractionPositions()) {
+                    positions.Add(p);
+                    buildings.Add(b);
                 }
-            }
-
-            // Skip unreachable buildings
-            if (best == -1) continue;
-
-            bs.Add(new DistantB<B>(b, positions[best], bestDistance));
         }
-
-        bs.Sort();
-        return bs;
+        int i = NearestTarget(pos, positions);
+        if (i == -1) {
+            return new InteractableBuilding<B>(null, Vector2Int.zero);
+        }
+        return new InteractableBuilding<B>(buildings[i], positions[i]);
     }
 
     public bool drawWalkable;
@@ -304,7 +309,7 @@ public class WorldGrid : MonoBehaviour {
                     Vector3 pos = RealPos(new Vector2Int(x, y));
                     Gizmos.color = cells[y, x].isWalkable ? Color.green : Color.red;
                     Gizmos.DrawCube(pos, Vector3.one);
-                } 
+                }
             }
         }
     }
