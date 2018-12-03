@@ -212,7 +212,7 @@ public class Worker : MonoBehaviour {
                     gotPath = true;
                     if (--steps <= 0) break;
                 }
-                if (abortMoveTo) {
+                if (worker == null || abortMoveTo) {
                     // For some reason the target became unwalkable, just choose another
                     worker = null;
                     break;
@@ -258,7 +258,7 @@ public class Worker : MonoBehaviour {
                 gotPath = true;
                 if (--steps <= 0) break;
             }
-            if (abortMoveTo) {
+            if (worker == null || abortMoveTo) {
                 // For some reason the target became unwalkable, just choose another
                 worker = null;
                 break;

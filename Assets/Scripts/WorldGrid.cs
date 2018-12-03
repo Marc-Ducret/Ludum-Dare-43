@@ -335,7 +335,9 @@ public class WorldGrid : MonoBehaviour {
     }
 
     private void Update() {
-        cyclePosition = Mathf.Repeat(Time.time, dayDuration + nightDuration);
+        float factor = (night && FindObjectOfType<Worker>() == null ? 10f : 1);
+
+        cyclePosition = Mathf.Repeat(cyclePosition + factor * Time.deltaTime, dayDuration + nightDuration);
         const float transition = 5f;
         var fade = Mathf.Clamp(dayDuration / 2 - Mathf.Abs(cyclePosition - dayDuration / 2), 0, transition) / transition;
         sun.intensity = fade * 5 + 1e-2f;
