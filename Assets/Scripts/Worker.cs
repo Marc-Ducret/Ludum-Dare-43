@@ -51,6 +51,7 @@ public class Worker : MonoBehaviour {
         }
 
         notif = FindObjectOfType<Notifications>();
+        notif.Post(String.Format("A {0} joined your cult!", job));
     }
 
     IEnumerable<int> Actions() {
@@ -86,6 +87,7 @@ public class Worker : MonoBehaviour {
         Debug.Assert(corn >= 0, "Harvest failed");
         animation.Act(2, 1);
         while (animation.IsActing) yield return 0;
+        if (field == null) yield break;
         field.Replant(corn);
         animation.Hold(Resource.Food);
 
@@ -116,6 +118,7 @@ public class Worker : MonoBehaviour {
         tree.harvested = true;
         animation.Act(4, 3);
         while (animation.IsActing) yield return 0;
+        if (tree == null) yield break;
         tree.GetComponent<VoxelModel>().Explode();
         animation.Hold(Resource.Wood);
 
@@ -159,12 +162,15 @@ public class Worker : MonoBehaviour {
         building.ProvideWood();
         animation.Act(5, 5);
         while (animation.IsActing) yield return 0;
+        if (building == null) yield break;
         yield return 0;
     }
 
     IEnumerable<int> PriestWork() {
         Worker worker = null;
         while (worker == null) {
+            foreach (int i in EatSleep()) yield return i;
+
             Worker[] workers = FindObjectsOfType<Worker>();
             if (workers.Length == 1) {
                 // The only worker is ourself!
@@ -180,12 +186,13 @@ public class Worker : MonoBehaviour {
             }
 
             // Now try to catch him
-            // TODO: what if the worker dies in the meantime?
             while ((transform.position - worker.transform.position).sqrMagnitude >= 1) {
                 bool gotPath = false;
                 int steps = 10;
                 foreach (int i in MoveTo(WorldGrid.instance.GridPos(worker.transform.position))) {
                     yield return 0;
+                    if (worker == null) break; // The worker died prematurely without our aid
+
                     gotPath = true;
                     if (--steps <= 0) break;
                 }
@@ -201,6 +208,7 @@ public class Worker : MonoBehaviour {
                         // We are on the same cell, in which case we just move in direction of the target to reach its real world pos
                         DirectMoveTo(worker.transform.position);
                         yield return 0;
+                        if (worker == null) break; // The worker died prematurely without our aid
                     } else {
                         // The target is unreachable, in which case we should choose another
                         worker = null;
@@ -265,6 +273,7 @@ public class Worker : MonoBehaviour {
             while (animation.IsActing) {
                 yield return 0;
             }
+            if (h == null) yield break;
 
             Worker w = Instantiate(workerPrefabs[Random.Range(0, workerPrefabs.Length)]);
             w.transform.position = transform.position;
@@ -352,7 +361,7 @@ public class Worker : MonoBehaviour {
             }
 
             // Now that we are near the building, check if the predicate is still true
-            if (!pred(target.b)) {
+            if (target.b == null || !pred(target.b)) {
                 continue; // Search another building now that we moved
             }
 

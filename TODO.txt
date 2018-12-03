@@ -9,7 +9,9 @@ Height: put road down or put charcters up
 Put a beard and maybe a cap to the loggers
 Make sure you can't interact with buildings in construction
 Interaction positions of church/house
+
 Buildings pop constructed
+Can't find house
 
 God gameplay: faith, cataclysm
 Music/suond?

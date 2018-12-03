@@ -9,7 +9,7 @@ public class Notifications : MonoBehaviour {
     TextMeshProUGUI text;
 
     // Start is called before the first frame update
-    void Start() {
+    void Awake() {
         lines = new Queue<string>();
         for (int i = 0; i < numLines - 1; i++)
             lines.Enqueue("");
