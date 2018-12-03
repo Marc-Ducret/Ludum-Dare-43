@@ -12,6 +12,8 @@ using Random = UnityEngine.Random;
 [RequireComponent(typeof(AnimateBody))]
 public class Worker : MonoBehaviour {
     public enum Job { Farmer, Builder, Breeder, Priest, Logger };
+    bool isSacrificed = false;
+    bool isReadyForSacrifice = false;
     public Job job = Job.Farmer;
     public Worker[] workerPrefabs;
 
@@ -45,6 +47,8 @@ public class Worker : MonoBehaviour {
     }
 
     IEnumerable<int> Actions() {
+        if (isSacrificed) while (true) foreach (int i in SacrificedWork()) yield return i;
+
         switch (job) {
             case Job.Farmer:
                 while (true) foreach (int i in FarmerWork()) yield return 0;
@@ -214,29 +218,78 @@ public class Worker : MonoBehaviour {
             }
         }
 
-        // TEMP: KILL HIM
+        // Get him!
+        worker.isSacrificed = true;
+        worker.actions = worker.Actions().GetEnumerator();
+        animation.Act(1, 3);
+        while (animation.IsActing) yield return 0;
+
+        // Follow the poor guy to the temple
+        // NICE COPY
+        while (!worker.isReadyForSacrifice || (transform.position - worker.transform.position).sqrMagnitude >= 1) {
+            bool gotPath = false;
+            int steps = 10;
+            foreach (int i in MoveTo(WorldGrid.instance.GridPos(worker.transform.position))) {
+                yield return 0;
+                if (worker == null || !worker.gameObject.activeSelf) {
+                    worker = null;
+                    break;
+                }
+
+                gotPath = true;
+                if (--steps <= 0) break;
+            }
+            if (abortMoveTo) {
+                // For some reason the target became unwalkable, just choose another
+                worker = null;
+                break;
+            }
+
+            if (!gotPath) {
+                // There is no path to the target.
+                if (WorldGrid.instance.GridPos(worker.transform.position) == WorldGrid.instance.GridPos(transform.position)) {
+                    // We are on the same cell, in which case we just move in direction of the target to reach its real world pos
+                    DirectMoveTo(worker.transform.position);
+                    yield return 0;
+                    if (worker == null || !worker.gameObject.activeSelf) {
+                        worker = null;
+                        break;
+                    }
+                } else {
+                    // The target is unreachable, in which case we should choose another
+                    worker = null;
+                    break;
+                }
+            }
+        }
+        // Make sure the worker reached the temple
+        if (worker == null) yield break;
+
+        // NOW KILL HIM
+        animation.Act(5, 15);
+        while (animation.IsActing) yield return 0;
         worker.Die("was sacrificed by your Priest");
         yield return 0;
+    }
 
-        // Go to the church
+    IEnumerable<int> SacrificedWork() {
+        // Wait for the animation of the priest
+        float time = Time.time;
+        while (Time.time < time + 1) yield return 0;
 
-        //Debug.Assert(warehouse.RemoveElement(Resource.Wood), "Retrieve failed");
-        //animation.Hold(Resource.Wood);
+        // Go to the temple
+        Temple temple = null;
+        foreach (var t in FindBuilding<Temple>(t => t.CanSacrifice())) {
+            if (t == null) {
+                yield return 0;
+            } else {
+                temple = t;
+            }
+        }
 
-        //Building building = null;
-        //foreach (var b in FindBuilding<Building>(b => !b.IsFinished())) {
-        //    if (b == null) {
-        //        yield return 0;
-        //    } else {
-        //        building = b;
-        //    }
-        //}
-
-        //animation.Drop();
-        //animation.acting = 1;
-        //while (animation.acting > 0) yield return 0;
-        //building.ProvideWood();
-        //yield return 0;
+        // Wait to die
+        isReadyForSacrifice = true;
+        while (true) yield return 0;
     }
 
     IEnumerable<int> BreederWork() {
@@ -303,7 +356,7 @@ public class Worker : MonoBehaviour {
             // Go to eat
             Warehouse warehouse = null;
             float morning = Time.time;
-            foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Food))) {
+            foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Food), false)) {
                 if (w == null) {
                     Debug.Log("Trying to eat " + Time.time + " " + morning + " " + starvingTime);
                     if (Time.time - morning >= starvingTime) {

@@ -6,7 +6,7 @@ Fixes
 - Meteorite water
 
 Gameplay
-- Priests: go to church to sacrifice
+- Animations for priests/sacrifice etc
 - Balance stuff
 - Polish camera (zoom, etc)
 - Do something with trees
