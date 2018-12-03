@@ -34,7 +34,6 @@ public class BuildingSelector : MonoBehaviour {
             if (Input.GetMouseButtonDown(0) && canPlace) {
                 var building = Instantiate(selected.buildingPrefab);
                 building.transform.position = snapPosition;
-                UpdateSelection(null);
             }
         }
     }

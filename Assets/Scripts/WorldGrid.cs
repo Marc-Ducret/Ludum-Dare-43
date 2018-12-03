@@ -133,6 +133,11 @@ public class WorldGrid : MonoBehaviour {
 
     // Stop as soon as we reached one target
     public PathInfo[,] AStar(Vector2Int origin, List<Vector2Int> targets) {
+        PathInfo[,] path = new PathInfo[height, width];
+        if (targets.Count == 0) {
+            return path;
+        }
+        
         targets = targets.ToList();
         targets.Sort((tA, tB) => (tA - origin).sqrMagnitude.CompareTo((tB - origin).sqrMagnitude));
         if (targets.Count > 50) {
@@ -145,11 +150,6 @@ public class WorldGrid : MonoBehaviour {
                 Debug.LogError("Un-walkable target " + target.ToString());
                 return null;
             }
-        }
-
-        PathInfo[,] path = new PathInfo[height, width];
-        if (targets.Count == 0) {
-            return path;
         }
 
         PriorityQueue<Position> toVisit = new PriorityQueue<Position>();

@@ -405,7 +405,7 @@ public class Worker : MonoBehaviour {
         currentVelocity = baseVelocity * (WorldGrid.instance.cells[pos.y, pos.x].isRoad ? WorldGrid.roadFactor : 1f);
 
         // Move to objective
-        Vector3 delta = target - transform.position;
+        Vector3 delta = Vector3.ProjectOnPlane(target - transform.position, Vector3.up);
         delta = delta * Mathf.Min(1, currentVelocity * Time.deltaTime / delta.magnitude);
         transform.position += delta;
         animation.velocity.x = delta.x / Time.deltaTime;
