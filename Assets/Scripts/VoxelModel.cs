@@ -219,4 +219,8 @@ public class VoxelModel : MonoBehaviour {
 
         VoxelsList = visited;
     }
+
+    public int MaxDepth() {
+        return VoxelsList[VoxelsList.Count - 1].depth;
+    }
 }

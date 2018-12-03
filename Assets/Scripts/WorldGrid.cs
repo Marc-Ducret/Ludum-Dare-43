@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -111,25 +112,26 @@ public class WorldGrid : MonoBehaviour {
         PlaceTrees();
     }
 
-    public List<Neighbor> Neighbors(Vector2Int pos) {
-        List<Neighbor> neighbors = new List<Neighbor>(8);
-
+    public IEnumerable<Neighbor> Neighbors(Vector2Int pos) {
         for (int y = -1; y <= 1; y++) {
             for (int x = -1; x <= 1; x++) {
                 Vector2Int delta = new Vector2Int(x, y);
                 Vector2Int next = pos + delta;
                 float dist = delta.magnitude;
                 if (next.x >= 0 && next.x < width && next.y >= 0 && next.y < height && dist != 0 && cells[next.y, next.x].isWalkable) {
-                    neighbors.Add(new Neighbor(next, dist));
+                    yield return new Neighbor(next, dist);
                 }
             }
         }
-
-        return neighbors;
     }
 
     // Stop as soon as we reached one target
     public PathInfo[,] AStar(Vector2Int origin, List<Vector2Int> targets) {
+        if (targets.Count > 100) {
+            targets = targets.ToList();
+            targets.Sort((tA, tB) => (tA - origin).sqrMagnitude.CompareTo((tB - origin).sqrMagnitude));
+            targets = targets.Take(100).ToList();
+        }
         foreach (Vector2Int target in targets) {
             if (!cells[target.y, target.x].isWalkable) {
                 Debug.LogError("Un-walkable target");
@@ -147,8 +149,10 @@ public class WorldGrid : MonoBehaviour {
         Action<Vector2Int, Vector2Int, float> enqueue = (Vector2Int pos, Vector2Int father, float dOrigin) => {
             float dTarget = Mathf.Infinity;
             foreach (Vector2Int target in targets) {
-                dTarget = Mathf.Min(dTarget, (target - pos).magnitude / roadFactor);
+                dTarget = Mathf.Min(dTarget, (target - pos).sqrMagnitude);
             }
+
+            dTarget = Mathf.Sqrt(dTarget) / roadFactor;
             toVisit.Enqueue(new Position(pos, father, dOrigin, dTarget));
         };
 

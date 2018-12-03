@@ -2,16 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(VoxelModel))]
 public class Building : MonoBehaviour {
     [HideInInspector]
     public Vector2Int pos; // bottom left cell
     public Vector2Int size;
-    public bool isWalkable = false;
+    public bool isWalkable;
+    public int woodRequired;
+    
+    public int woodProvided;
+    private VoxelModel model;
 
     public void Start() {
         pos = WorldGrid.instance.GridPos(transform.position);
 
         WorldGrid.instance.AddBuilding(this);
+        model = GetComponent<VoxelModel>();
+        UpdateModel();
     }
 
     public bool Walkable() {
@@ -51,5 +58,23 @@ public class Building : MonoBehaviour {
 
     private void OnDestroy() {
         WorldGrid.instance.RemoveBuilding(this);
+    }
+
+    public bool IsFinished() {
+        return woodProvided >= woodRequired;
+    }
+
+    [ContextMenu("Provide Wood")]
+    public void ProvideWood() {
+        woodProvided++;
+        UpdateModel();
+    }
+
+    private float Progress() {
+        return woodProvided / (float) woodRequired;
+    }
+
+    private void UpdateModel() {
+        model.GenerateMesh((int) (model.MaxDepth() * Progress()));
     }
 }
