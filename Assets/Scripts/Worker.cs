@@ -43,11 +43,12 @@ public class Worker : MonoBehaviour {
 
     Notifications notif;
     private Faith faith;
+    private float speedBonus;
 
     [HideInInspector]
     public House house;
+    
 
-    // Start is called before the first frame update
     void Start() {
         currentPath = new List<Vector2Int>();
         target = new Vector2Int(-1, -1);
@@ -195,7 +196,7 @@ public class Worker : MonoBehaviour {
 
             Worker[] workers = FindObjectsOfType<Worker>();
             if (workers.Length == 1) {
-                // The only worker is ourself!
+                // The only worker is ourselves!
                 yield return 0;
                 continue;
             }
@@ -244,6 +245,13 @@ public class Worker : MonoBehaviour {
                     }
                 }
             }
+        }
+
+        if (Random.value > .1f) {
+            animation.Act(.5f, 1, worker.transform.position);
+            while (animation.IsActing) yield return 0;
+            worker.speedBonus = 10;
+            yield break;
         }
 
         // Get him!
@@ -476,7 +484,8 @@ public class Worker : MonoBehaviour {
         // Update velocity
         Vector2Int pos = WorldGrid.instance.GridPos(transform.position);
         float velocity = baseVelocity * speedup * (WorldGrid.instance.cells[pos.y, pos.x].isRoad ? WorldGrid.roadFactor : 1f);
-        velocity *= 1f/Mathf.Lerp(1, faithSlowDown, 1 - faith.value);
+        velocity *= 1f / Mathf.Lerp(1, faithSlowDown, 1 - faith.value);
+        if (speedBonus > 0) velocity *= 1.5f;
 
         // Move to objective
         Vector3 delta = Vector3.ProjectOnPlane(target - transform.position, Vector3.up);
@@ -488,6 +497,7 @@ public class Worker : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         actions.MoveNext();
+        if (speedBonus > 0) speedBonus = Mathf.Max(speedBonus - Time.deltaTime, 0);
     }
 
     public void Die(string message) {
