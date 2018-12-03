@@ -14,6 +14,7 @@ public class WorldGrid : MonoBehaviour {
     public int width;
     public int height;
     public float scale;
+    public float timeScale = 1f;
 
     public int treeCount;
     public Building treePrefab;
@@ -335,6 +336,8 @@ public class WorldGrid : MonoBehaviour {
     }
 
     private void Update() {
+        Time.timeScale = timeScale;
+
         float factor = (night && FindObjectOfType<Worker>() == null ? 10f : 1);
 
         cyclePosition = Mathf.Repeat(cyclePosition + factor * Time.deltaTime, dayDuration + nightDuration);

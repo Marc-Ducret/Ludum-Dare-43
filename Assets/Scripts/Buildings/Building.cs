@@ -69,11 +69,13 @@ public class Building : MonoBehaviour {
         return l.FindAll(p => WorldGrid.instance.IsValid(p) && WorldGrid.instance.IsWalkable(p));
     }
 
+    public float buildingTime;
+
     public void Update() {
         if (woodRequired == 0) progress = 1;
         else {
             progress = Mathf.Min(
-                progress + Time.deltaTime / woodRequired * .2f,
+                progress + Time.deltaTime / woodRequired / buildingTime,
                 woodProvided / (float) woodRequired);
             var newDepth = (int) (model.MaxDepth() * progress);
             if (newDepth != modelDepth) {
@@ -87,8 +89,9 @@ public class Building : MonoBehaviour {
         WorldGrid.instance.RemoveBuilding(this);
     }
 
+    public bool isBeingConstructed = false;
     public bool RequireMoreWood() {
-        return woodProvided < woodRequired;
+        return woodProvided < woodRequired && !isBeingConstructed;
     }
 
     public bool IsFinished() {
@@ -97,6 +100,7 @@ public class Building : MonoBehaviour {
 
     [ContextMenu("Provide Wood")]
     public void ProvideWood() {
+        isBeingConstructed = true;
         woodProvided++;
     }
 

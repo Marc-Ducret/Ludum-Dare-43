@@ -4,11 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-// TODOs:
-// - recompute paths when a new building is created/destroyed
-// - findbuilding can be optimized to only compute distances of interesting buildings, and only return the closest instead of sorting them
-// - go to buildings that will soon become harvestable / wait at points of interest
-
 [RequireComponent(typeof(AnimateBody))]
 public class Worker : MonoBehaviour {
     public enum Job { Farmer, Builder, Breeder, Priest, Logger };
@@ -18,11 +13,24 @@ public class Worker : MonoBehaviour {
     public Job job = Job.Farmer;
 
     public float baseVelocity = 3f;
-    public float currentVelocity;
+    public float numDaysBeforeDouble = 3f;
+    public float speedup {
+        get {
+            return (1 + Mathf.Log(1 + (Mathf.Exp(1) - 1) * numNights / numDaysBeforeDouble));
+        }
+    }
     public float height = 0f;
 
     public float starvingTime = 20f;
     public float faithSlowDown = 3f;
+    int numNights = 0;
+
+    public float plantingTime = 2f;
+    public float choppingTime = 4f;
+    public float buildingTime = 5f;
+    public float hexingTime = 3f;
+    public float sacrificingTime = 10f;
+    public float breedingTime = 3f;
 
     private AnimateBody animation;
 
@@ -43,7 +51,6 @@ public class Worker : MonoBehaviour {
     void Start() {
         currentPath = new List<Vector2Int>();
         target = new Vector2Int(-1, -1);
-        currentVelocity = baseVelocity;
         actions = Actions().GetEnumerator();
         animation = GetComponent<AnimateBody>();
 
@@ -98,7 +105,7 @@ public class Worker : MonoBehaviour {
 
         var corn = field.Harvest();
         Debug.Assert(corn >= 0, "Harvest failed");
-        animation.Act(2, 1, InteractionWorldPos(field));
+        animation.Act(plantingTime / speedup, 1, InteractionWorldPos(field));
         while (animation.IsActing) yield return 0;
         if (field == null) yield break;
         field.Replant(corn);
@@ -129,7 +136,7 @@ public class Worker : MonoBehaviour {
         }
 
         tree.harvested = true;
-        animation.Act(4, 3, InteractionWorldPos(tree));
+        animation.Act(choppingTime / speedup, 3, InteractionWorldPos(tree));
         while (animation.IsActing) yield return 0;
         if (tree == null) yield break;
         tree.GetComponent<VoxelModel>().Explode();
@@ -172,10 +179,12 @@ public class Worker : MonoBehaviour {
         }
 
         animation.Drop();
+        building.buildingTime = buildingTime / speedup;
         building.ProvideWood();
-        animation.Act(5, 5, InteractionWorldPos(building));
+        animation.Act(buildingTime / speedup, 5, InteractionWorldPos(building));
         while (animation.IsActing) yield return 0;
         if (building == null) yield break;
+        building.isBeingConstructed = false;
         yield return 0;
     }
 
@@ -239,8 +248,9 @@ public class Worker : MonoBehaviour {
 
         // Get him!
         worker.isSacrificed = true;
+        worker.hexingTimeOfPriest = hexingTime / speedup;
         worker.actions = worker.Actions().GetEnumerator();
-        animation.Act(1, 3, worker.transform.position);
+        animation.Act(hexingTime / speedup, 3, worker.transform.position);
         while (animation.IsActing) yield return 0;
 
         // Follow the poor guy to the temple
@@ -287,17 +297,18 @@ public class Worker : MonoBehaviour {
 
         // NOW KILL HIM
         temple.StartSacrifice();
-        animation.Act(5, 15, worker.transform.position);
+        animation.Act(sacrificingTime / speedup, 15, worker.transform.position);
         while (animation.IsActing) yield return 0;
         if (worker) worker.Die("was sacrificed by your Priest");
         if (temple) temple.EndSacrifice();
         yield return 0;
     }
 
+    float hexingTimeOfPriest;
     IEnumerable<int> SacrificedWork() {
         // Wait for the animation of the priest
         float time = Time.time;
-        while (Time.time < time + 1) yield return 0;
+        while (Time.time < time + hexingTimeOfPriest) yield return 0;
 
         // Go to the temple
         Temple temple = null;
@@ -339,7 +350,7 @@ public class Worker : MonoBehaviour {
 
         animation.Drop();
         h.AddFood();
-        animation.Act(1, 1, InteractionWorldPos(h));
+        animation.Act(breedingTime / speedup, 3, InteractionWorldPos(h));
         while (animation.IsActing) {
             yield return 0;
         }
@@ -464,12 +475,12 @@ public class Worker : MonoBehaviour {
     void DirectMoveTo(Vector3 target) {
         // Update velocity
         Vector2Int pos = WorldGrid.instance.GridPos(transform.position);
-        currentVelocity = baseVelocity * (WorldGrid.instance.cells[pos.y, pos.x].isRoad ? WorldGrid.roadFactor : 1f);
-        currentVelocity *= 1f/Mathf.Lerp(1, faithSlowDown, 1 - faith.value);
+        float velocity = baseVelocity * speedup * (WorldGrid.instance.cells[pos.y, pos.x].isRoad ? WorldGrid.roadFactor : 1f);
+        velocity *= 1f/Mathf.Lerp(1, faithSlowDown, 1 - faith.value);
 
         // Move to objective
         Vector3 delta = Vector3.ProjectOnPlane(target - transform.position, Vector3.up);
-        delta = delta * Mathf.Min(1, currentVelocity * Time.deltaTime / delta.magnitude);
+        delta = delta * Mathf.Min(1, velocity * Time.deltaTime / delta.magnitude);
         transform.position += delta;
         animation.velocity = delta / Time.deltaTime;
     }
