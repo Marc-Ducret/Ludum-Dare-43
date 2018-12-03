@@ -10,13 +10,9 @@ public class Warehouse : Building {
     private Resource elementType;
     public Transform woodPrefab;
     public Transform foodPrefab;
-
-    private new void Start() {
-        base.Start();
-        //for(var i = 0; i < 20; i++) print(AddElement(Resource.Food));
-    }
     
     public bool AddElement(Resource elemType) { //False : Full warehouse or bad element type
+        if (!IsFinished()) return false;
         if (IsEmpty()) {
             elementType = elemType; 
         }
@@ -58,13 +54,12 @@ public class Warehouse : Building {
         return true;
     }
 
-
     public bool Has(Resource elemType) {
         return !IsEmpty() && elementType == elemType;
     }
 
     public bool CanStore(Resource elemType) {
-        return (IsEmpty() || elementType == elemType) && !IsFull();
+        return IsFinished() && (IsEmpty() || elementType == elemType) && !IsFull();
     }
 
     private Transform CreateElement(int index) {

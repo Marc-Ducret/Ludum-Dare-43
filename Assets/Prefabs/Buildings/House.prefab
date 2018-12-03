@@ -50,6 +50,7 @@ MonoBehaviour:
   model: {fileID: 4900000, guid: dccb8d2955155694a9baa6424af62293, type: 3}
   horizontalCenter: 0
   noDownFaces: 0
+  colorNoise: 0
   particlePrefab: {fileID: 5640653648253450711, guid: fbb7f09a5b8860e49b2d5addc66f9c38,
     type: 3}
 --- !u!33 &5529161066980595302
@@ -112,3 +113,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pos: {x: 0, y: 0}
   size: {x: 3, y: 3}
+  isWalkable: 0
+  woodRequired: 1

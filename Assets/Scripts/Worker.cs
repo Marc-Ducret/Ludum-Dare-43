@@ -59,8 +59,7 @@ public class Worker : MonoBehaviour {
                     foreach (Warehouse w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Food))) {
                         if (w == null) {
                             yield return 0;
-                        }
-                        else {
+                        } else {
                             warehouse = w;
                         }
                     }
@@ -72,7 +71,6 @@ public class Worker : MonoBehaviour {
 
             case Job.Logger:
                 while (true) {
-                    // Find a suitable field
                     Tree tree = null;
                     foreach (Tree t in FindBuilding<Tree>(t => true)) {
                         if (t == null) {
@@ -93,14 +91,43 @@ public class Worker : MonoBehaviour {
                     foreach (Warehouse w in FindBuilding<Warehouse>(w => w.CanStore(Resource.Wood))) {
                         if (w == null) {
                             yield return 0;
-                        }
-                        else {
+                        } else {
                             warehouse = w;
                         }
                     }
 
                     Debug.Assert(warehouse.AddElement(Resource.Wood), "Storing failed");
                     animation.Drop();
+                    yield return 0;
+                }
+                
+            case Job.Builder:
+                while (true) {
+                    Warehouse warehouse = null;
+                    foreach (Warehouse w in FindBuilding<Warehouse>(w => w.Has(Resource.Wood))) {
+                        if (w == null) {
+                            yield return 0;
+                        } else {
+                            warehouse = w;
+                        }
+                    }
+                    
+                    Debug.Assert(warehouse.RemoveElement(Resource.Wood), "Retrieve failed");
+                    animation.Hold(Resource.Wood);
+                    
+                    Building building = null;
+                    foreach (var b in FindBuilding<Building>(b => !b.IsFinished())) {
+                        if (b == null) {
+                            yield return 0;
+                        } else {
+                            building = b;
+                        }
+                    }
+
+                    animation.Drop();
+                    animation.acting = 1;
+                    while (animation.acting > 0) yield return 0;
+                    building.ProvideWood();
                     yield return 0;
                 }
         }
