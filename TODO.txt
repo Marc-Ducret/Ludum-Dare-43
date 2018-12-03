@@ -23,10 +23,14 @@ Won't do
 
 To balance:
 - faith constants
-- food constants
-- debut town
 
 Destroy temple = big malus in faith
 Escape from meteorite: increase in faith?
 What is the point of roads? They have no cost
 GUI for houses?
+
+Messages for icons
+CAMERA
+Spawn people?
+Look at faith
+Priests become more angry
