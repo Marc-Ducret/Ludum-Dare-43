@@ -4,43 +4,39 @@ using UnityEngine;
 
 public class House : Building {
     public int population = 4;
-    Worker[] inhabitants;
+    int peopleInside = 0;
+    public Worker[] workerPrefabs;
 
-    public int foodRequired = 3;
-    int foodStored;
+    public int foodCost = 5;
+    public int foodCapacity = 20;
+    int foodStored = 0;
 
     // Start is called before the first frame update
     new void Start() {
         base.Start();
-
-        inhabitants = new Worker[population];
     }
 
     public bool HasRoom() {
-        if (!IsFinished()) return false;
-        foreach (Worker w in inhabitants) {
-            if (w == null) return true;
-        }
-        return false;
+        return IsFinished() && peopleInside < population;
     }
 
-    public bool Inhabit(Worker w) {
-        for (int i = 0; i < population; i++) {
-            if (inhabitants[i] == null) {
-                inhabitants[i] = w;
-                return true;
-            }
-        }
-        return false;
+    public void Inhabit() {
+        peopleInside++;
     }
 
-    public bool AddFood() {
+    public void Leave() {
+        peopleInside--;
+        if (peopleInside == 0) {
+            while (TryCreateWorker()) ;
+        }
+    }
+
+    public bool CanStoreFood() {
+        return IsFinished() && foodStored < foodCapacity;
+    }
+
+    public void AddFood() {
         foodStored++;
-        if (foodStored == foodRequired) {
-            foodStored = 0;
-            return true;
-        }
-        return false;
     }
 
     // Update is called once per frame
@@ -52,5 +48,25 @@ public class House : Building {
         //    s += " " + (w == null ? "null" : w.job.ToString()); 
         //}
         //Debug.Log("Inhabitants " + s);
+    }
+
+    public bool TryCreateWorker() {
+        if (foodStored < foodCost) return false;
+        List<Vector2Int> pos = InteractionPositions();
+        if (pos.Count == 0) return false;
+
+        Worker w = Instantiate(workerPrefabs[Random.Range(0, workerPrefabs.Length)]);
+        w.transform.position = WorldGrid.instance.RealPos(pos[Random.Range(0, pos.Count - 1)]);
+        Debug.Log("Created " + w.ToString() + " at " + w.transform.position.ToString());
+        foodStored -= foodCost;
+        return true;
+    }
+
+    public bool TryEat() {
+        if (foodStored > 0) {
+            foodStored--;
+            return true;
+        }
+        return false;
     }
 }

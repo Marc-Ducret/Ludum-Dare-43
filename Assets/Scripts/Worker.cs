@@ -15,7 +15,6 @@ public class Worker : MonoBehaviour {
     bool isSacrificed = false;
     bool isReadyForSacrifice = false;
     public Job job = Job.Farmer;
-    public Worker[] workerPrefabs;
 
     public float baseVelocity = 3f;
     public float currentVelocity;
@@ -306,7 +305,7 @@ public class Worker : MonoBehaviour {
         animation.Hold(Resource.Food);
 
         House h = null;
-        foreach (var b in FindBuilding<House>(b => b.HasRoom())) {
+        foreach (var b in FindBuilding<House>(b => b.CanStoreFood())) {
             if (b == null) {
                 yield return 0;
             } else {
@@ -315,78 +314,52 @@ public class Worker : MonoBehaviour {
         }
 
         animation.Drop();
-        bool create = h.AddFood();
-        yield return 0;
-        if (create) {
-            animation.Act(5, 5);
-            while (animation.IsActing) {
-                yield return 0;
-            }
-            if (h == null) yield break;
-
-            Worker w = Instantiate(workerPrefabs[Random.Range(0, workerPrefabs.Length)]);
-            w.transform.position = transform.position;
-            w.transform.rotation = transform.rotation;
-            Debug.Log("Created " + w.ToString() + " at " + w.transform.position.ToString());
+        h.AddFood();
+        animation.Act(1, 1);
+        while (animation.IsActing) {
             yield return 0;
         }
     }
 
     IEnumerable<int> EatSleep() {
         if (WorldGrid.instance.night) {
-            bool reachedHouse = false;
-            foreach (bool b in GoToSleep()) {
-                if (b) {
-                    reachedHouse = true;
-                } else {
-                    yield return 0;
-                }
-            }
-            if (reachedHouse) {
-                isSleeping = true;
-                gameObject.SetActive(false);
-                WorldGrid.instance.sleepers.Add(this);
-                yield return 0;
-            } else {
-                while (true) yield return 0; // Wait to die
-            }
-            
-            
-
-            // Go to eat
-            Warehouse warehouse = null;
-            float morning = Time.time;
-            foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Food), false)) {
-                if (w == null) {
-                    Debug.Log("Trying to eat " + Time.time + " " + morning + " " + starvingTime);
-                    if (Time.time - morning >= starvingTime) {
-                        Die("starved to death");
-                    }
+            House h = null;
+            foreach (var b in FindBuilding<House>(b => b.HasRoom(), false)) {
+                if (b == null) {
                     yield return 0;
                 } else {
-                    warehouse = w;
+                    h = b;
                 }
             }
 
-            Debug.Assert(warehouse.RemoveElement(Resource.Food), "Retrieve failed");
+            h.Inhabit();
+            isSleeping = true;
+            gameObject.SetActive(false);
+            WorldGrid.instance.sleepers.Add(this);
             yield return 0;
-        }
-    }
 
-    // Actions to go to your house. If succeeded, yields a single true at the end
-    IEnumerable<bool> GoToSleep() {
-        // Go to your house
-        House h = null;
-        foreach (var b in FindBuilding<House>(b => b.HasRoom(), false)) {
-            if (b == null) {
-                yield return false;
-            } else {
-                h = b;
+            // Awake, try to eat inside the house
+            bool hasEaten = h.TryEat();
+            h.Leave();
+            if (!hasEaten) {
+                // Go to eat outside
+                Warehouse warehouse = null;
+                float morning = Time.time;
+                foreach (var w in FindBuilding<Warehouse>(w => w.Has(Resource.Food), false)) {
+                    if (w == null) {
+                        Debug.Log("Trying to eat " + Time.time + " " + morning + " " + starvingTime);
+                        if (Time.time - morning >= starvingTime) {
+                            Die("starved to death");
+                        }
+                        yield return 0;
+                    } else {
+                        warehouse = w;
+                    }
+                }
+
+                Debug.Assert(warehouse.RemoveElement(Resource.Food), "Retrieve failed");
+                yield return 0;
             }
-        }
-
-        if (h != null) {
-            yield return true;
         }
     }
 
