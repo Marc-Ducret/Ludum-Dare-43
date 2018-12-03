@@ -480,6 +480,8 @@ MonoBehaviour:
   isWalkable: 0
   woodRequired: 5
   woodProvided: 0
+  toDisableAsGhost: []
+  faithBonus: 0.2
 --- !u!1 &6264669197900366589
 GameObject:
   m_ObjectHideFlags: 0

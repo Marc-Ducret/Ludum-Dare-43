@@ -32,6 +32,8 @@ public class Worker : MonoBehaviour {
     IEnumerator<int> actions;
 
     Notifications notif;
+    private Faith faith;
+    
 
     // Start is called before the first frame update
     void Start() {
@@ -43,6 +45,8 @@ public class Worker : MonoBehaviour {
 
         notif = FindObjectOfType<Notifications>();
         notif.Post(String.Format("A {0} joined your cult!", job));
+
+        faith = FindObjectOfType<Faith>();
     }
 
     IEnumerable<int> Actions() {
@@ -440,6 +444,7 @@ public class Worker : MonoBehaviour {
         // Update velocity
         Vector2Int pos = WorldGrid.instance.GridPos(transform.position);
         currentVelocity = baseVelocity * (WorldGrid.instance.cells[pos.y, pos.x].isRoad ? WorldGrid.roadFactor : 1f);
+        currentVelocity *= faith.value;
 
         // Move to objective
         Vector3 delta = Vector3.ProjectOnPlane(target - transform.position, Vector3.up);
