@@ -105,7 +105,6 @@ public class Worker : MonoBehaviour {
         }
 
         var corn = field.Harvest();
-        Debug.Assert(corn >= 0, "Harvest failed");
         animation.Act(plantingTime / speedup, 1, InteractionWorldPos(field));
         while (animation.IsActing) yield return 0;
         if (field == null) yield break;
@@ -121,7 +120,7 @@ public class Worker : MonoBehaviour {
             }
         }
 
-        Debug.Assert(warehouse.AddElement(Resource.Food), "Storing failed");
+        warehouse.AddElement(Resource.Food);
         animation.Drop();
         yield return 0;
     }
@@ -152,7 +151,7 @@ public class Worker : MonoBehaviour {
             }
         }
 
-        Debug.Assert(warehouse.AddElement(Resource.Wood), "Storing failed");
+        warehouse.AddElement(Resource.Wood);
         animation.Drop();
         yield return 0;
     }
@@ -167,7 +166,7 @@ public class Worker : MonoBehaviour {
             }
         }
 
-        Debug.Assert(warehouse.RemoveElement(Resource.Wood), "Retrieve failed");
+        warehouse.RemoveElement(Resource.Wood);
         animation.Hold(Resource.Wood);
 
         Building building = null;
@@ -344,7 +343,7 @@ public class Worker : MonoBehaviour {
             }
         }
 
-        Debug.Assert(warehouse.RemoveElement(Resource.Food), "Retrieve failed");
+        warehouse.RemoveElement(Resource.Food);
         animation.Hold(Resource.Food);
 
         House h = null;
@@ -401,7 +400,7 @@ public class Worker : MonoBehaviour {
                     }
                 }
 
-                Debug.Assert(warehouse.RemoveElement(Resource.Food), "Retrieve failed");
+                warehouse.RemoveElement(Resource.Food);
                 yield return 0;
             }
         }

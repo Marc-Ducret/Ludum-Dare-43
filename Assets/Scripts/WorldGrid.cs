@@ -361,7 +361,8 @@ public class WorldGrid : MonoBehaviour {
         pp.weight = Mathf.Lerp(pp.weight, isGameOver ? 1 : 0, Time.unscaledDeltaTime);
 
         if (Input.GetButtonDown("Restart")) Restart();
-        if (!isGameOver && FindObjectOfType<Worker>() == null || FindObjectOfType<Building>() == null || FindObjectOfType<Faith>().value <= 0) { GameOver(); }
+        if (!isGameOver && ((FindObjectOfType<Worker>() == null && sleepers.Count == 0) || FindObjectOfType<Building>() == null ||
+                            FindObjectOfType<Faith>().value <= 0)) GameOver();
 
         cyclePosition = Mathf.Repeat(cyclePosition + factor * Time.deltaTime, dayDuration + nightDuration);
         const float transition = 5f;
