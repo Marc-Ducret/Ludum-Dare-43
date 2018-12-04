@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -32,6 +33,8 @@ public class WorldGrid : MonoBehaviour {
     public Light sun;
     public bool night;
     public List<Worker> sleepers;
+
+    PostProcessVolume pp;
 
     public struct Cell {
         public bool isWalkable;
@@ -96,6 +99,7 @@ public class WorldGrid : MonoBehaviour {
         }
 
         ResetVisited();
+        pp = GetComponentInChildren<PostProcessVolume>();
     }
 
     private void PlaceTrees() {
@@ -337,21 +341,27 @@ public class WorldGrid : MonoBehaviour {
     }
 
     private void Restart() {
+        Time.timeScale = 1f;
         Debug.Log("Restart");
         Scene scene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(scene.name);
+        Time.timeScale = 1f;
     }
 
+    bool isGameOver = false;
     private void GameOver() {
-        Time.timeScale = 0f;
+        Time.timeScale = 1e-5f;
+        isGameOver = true;
         GameObject.FindGameObjectWithTag("Finish").GetComponent<Text>().text = "Game Over\nPress R to restart";
     }
 
     private void Update() {
         float factor = (night && FindObjectOfType<Worker>() == null ? 10f : 1);
 
+        pp.weight = Mathf.Lerp(pp.weight, isGameOver ? 1 : 0, Time.unscaledDeltaTime);
+
         if (Input.GetButtonDown("Restart")) Restart();
-        if (FindObjectOfType<Worker>() == null || FindObjectOfType<Building>() == null || FindObjectOfType<Faith>().value <= 0) { GameOver(); }
+        if (!isGameOver && FindObjectOfType<Worker>() == null || FindObjectOfType<Building>() == null || FindObjectOfType<Faith>().value <= 0) { GameOver(); }
 
         cyclePosition = Mathf.Repeat(cyclePosition + factor * Time.deltaTime, dayDuration + nightDuration);
         const float transition = 5f;
